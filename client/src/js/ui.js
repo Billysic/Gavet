@@ -1,6 +1,6 @@
 /**
- * Camada de Manipulação de Interface (UI) - Gaveta Inteligente
- * Responsável pela renderização de cards, badges de urgência e comportamento do modal.
+ * Camada de Manipulação de Interface (UI) - Gavet
+ * Design System Dark Mode: Azul Noturno (#0F172A), Azul Aço (#1E293B) e Verde Menta (#10B981)
  */
 
 // Formatação monetária padrão BRL
@@ -31,15 +31,15 @@ export function updateConnectionStatus(isOnline) {
   if (!container) return;
 
   if (isOnline) {
-    container.className = 'status-pill badge rounded-pill d-flex align-items-center gap-1 bg-success-subtle text-success border border-success-subtle px-2 py-1';
+    container.className = 'status-pill online badge rounded-pill d-flex align-items-center gap-1 px-2 py-1';
     container.innerHTML = `
-      <span class="status-dot bg-success pulse"></span>
+      <span class="status-dot bg-success pulse" style="background-color: #10B981 !important;"></span>
       <span class="status-text fw-medium" style="font-size: 0.72rem;">Online</span>
     `;
   } else {
-    container.className = 'status-pill badge rounded-pill d-flex align-items-center gap-1 bg-warning-subtle text-dark border border-warning-subtle px-2 py-1';
+    container.className = 'status-pill offline badge rounded-pill d-flex align-items-center gap-1 px-2 py-1';
     container.innerHTML = `
-      <span class="status-dot bg-warning"></span>
+      <span class="status-dot" style="background-color: #F59E0B !important;"></span>
       <span class="status-text fw-medium" style="font-size: 0.72rem;">Offline (Local)</span>
     `;
   }
@@ -65,7 +65,6 @@ export function showToast(message, type = 'info') {
   toastIcon.className = `bi ${icons[type] || icons.info} fs-5`;
   toastMessage.textContent = message;
 
-  // Import dinâmico do bootstrap Toast caso necessário
   if (window.bootstrap?.Toast) {
     const toast = new window.bootstrap.Toast(toastEl, { delay: 3500 });
     toast.show();
@@ -84,7 +83,7 @@ export function setAiLoadingState(isLoading) {
     loadingContainer.classList.toggle('d-none', !isLoading);
   }
   if (actionButtons) {
-    actionButtons.style.opacity = isLoading ? '0.5' : '1';
+    actionButtons.style.opacity = isLoading ? '0.4' : '1';
     actionButtons.style.pointerEvents = isLoading ? 'none' : 'auto';
   }
   if (saveBtn) {
@@ -104,13 +103,15 @@ export function renderUrgencyRadar(urgentItems = []) {
 
   if (!urgentItems || urgentItems.length === 0) {
     if (countBadge) {
-      countBadge.className = 'badge bg-success-subtle text-success rounded-pill';
+      countBadge.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+      countBadge.style.color = '#10B981';
+      countBadge.style.border = '1px solid rgba(16, 185, 129, 0.3)';
       countBadge.textContent = 'Tudo em dia';
     }
 
     container.innerHTML = `
-      <div class="card border-0 shadow-sm w-100 p-3 rounded-3 bg-white text-center">
-        <div class="d-flex align-items-center justify-content-center gap-2 text-success">
+      <div class="card border-0 w-100 p-3 rounded-3 text-center" style="background-color: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25) !important;">
+        <div class="d-flex align-items-center justify-content-center gap-2" style="color: #10B981;">
           <i class="bi bi-shield-check fs-4"></i>
           <span class="small fw-bold">Nenhuma garantia ou assinatura vencendo nos próximos 30 dias!</span>
         </div>
@@ -120,28 +121,35 @@ export function renderUrgencyRadar(urgentItems = []) {
   }
 
   if (countBadge) {
-    countBadge.className = 'badge bg-danger rounded-pill';
+    countBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+    countBadge.style.color = '#EF4444';
+    countBadge.style.border = '1px solid rgba(239, 68, 68, 0.4)';
     countBadge.textContent = `${urgentItems.length} alerta${urgentItems.length > 1 ? 's' : ''}`;
   }
 
   urgentItems.forEach(item => {
     const isCritical = item.nivelUrgencia === 'critico' || item.nivelUrgencia === 'hoje' || item.nivelUrgencia === 'expirado';
     const borderClass = isCritical ? 'border-urgency-critical' : 'border-urgency-warning';
-    const badgeBg = isCritical ? 'bg-danger text-white' : 'bg-warning text-dark';
+    
+    // Cores Semânticas de Alerta
+    const badgeStyle = isCritical
+      ? 'background: rgba(239, 68, 68, 0.25); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4);'
+      : 'background: rgba(245, 158, 11, 0.25); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4);';
+
     const icon = item.tipo_documento === 'assinatura' ? 'bi-arrow-repeat' : 'bi-shield-exclamation';
 
     const card = document.createElement('div');
-    card.className = `card urgency-card border-0 shadow-sm p-3 bg-white ${borderClass}`;
+    card.className = `card urgency-card p-3 ${borderClass}`;
     card.innerHTML = `
       <div class="d-flex justify-content-between align-items-start mb-2">
-        <span class="badge ${badgeBg} rounded-pill px-2 py-1 small">
+        <span class="badge rounded-pill px-2 py-1 small" style="${badgeStyle}">
           <i class="bi ${icon} me-1"></i>
           ${item.labelUrgencia}
         </span>
-        <span class="fw-bold text-dark">${formatCurrency(item.valor)}</span>
+        <span class="fw-bold" style="color: #F1F5F9;">${formatCurrency(item.valor)}</span>
       </div>
-      <h3 class="h6 fw-bold mb-1 text-truncate">${item.loja}</h3>
-      <div class="d-flex justify-content-between align-items-center text-muted small">
+      <h3 class="h6 fw-bold mb-1 text-truncate" style="color: #F1F5F9;">${item.loja}</h3>
+      <div class="d-flex justify-content-between align-items-center small" style="color: #94A3B8;">
         <span>Vencimento: ${formatDate(item.dataVencimento)}</span>
         <span class="text-capitalize">${item.tipo_documento}</span>
       </div>
@@ -170,7 +178,7 @@ export function updateMetrics(documents = []) {
 }
 
 /**
- * Renderiza a lista principal de documentos
+ * Renderiza a lista principal de documentos (Minha Gaveta)
  */
 export function renderDocumentsList(documents = [], activeFilter = 'todos', onDelete) {
   const listContainer = document.getElementById('documents-list');
@@ -195,9 +203,9 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
     card.className = 'card doc-card p-3 shadow-sm';
 
     const typeIcons = {
-      garantia: 'bi-shield-check text-primary',
+      garantia: 'bi-shield-check text-success',
       assinatura: 'bi-arrow-repeat text-info',
-      nota_fiscal: 'bi-receipt text-success'
+      nota_fiscal: 'bi-receipt text-warning'
     };
 
     const typeLabels = {
@@ -206,17 +214,17 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
       nota_fiscal: 'Nota Fiscal'
     };
 
-    // Indicador visual de vencimento na lista
+    // Cores Semânticas nos Badges dos cards
     let statusBadge = '';
     if (doc.diasRestantes !== undefined) {
       if (doc.diasRestantes < 0) {
-        statusBadge = '<span class="badge bg-secondary-subtle text-secondary border rounded-pill">Expirado</span>';
+        statusBadge = '<span class="badge rounded-pill" style="background: rgba(148, 163, 184, 0.15); color: #94A3B8; border: 1px solid rgba(148, 163, 184, 0.3);">Expirado</span>';
       } else if (doc.diasRestantes <= 7) {
-        statusBadge = `<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">${doc.labelUrgencia}</span>`;
+        statusBadge = `<span class="badge rounded-pill" style="background: rgba(239, 68, 68, 0.18); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.35);">${doc.labelUrgencia}</span>`;
       } else if (doc.diasRestantes <= 30) {
-        statusBadge = `<span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill">${doc.labelUrgencia}</span>`;
+        statusBadge = `<span class="badge rounded-pill" style="background: rgba(245, 158, 11, 0.18); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.35);">${doc.labelUrgencia}</span>`;
       } else {
-        statusBadge = '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Válido</span>';
+        statusBadge = '<span class="badge rounded-pill" style="background: rgba(16, 185, 129, 0.18); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.35);">Seguro</span>';
       }
     }
 
@@ -225,9 +233,9 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
         <div class="d-flex align-items-center gap-2">
           <i class="bi ${typeIcons[doc.tipo_documento] || 'bi-file-text'} fs-5"></i>
           <div>
-            <h3 class="h6 fw-bold mb-0 text-dark">${doc.loja}</h3>
+            <h3 class="h6 fw-bold mb-0" style="color: #F1F5F9;">${doc.loja}</h3>
             <div class="d-flex align-items-center gap-1 mt-1">
-              <span class="badge bg-light text-secondary border rounded-pill" style="font-size: 0.68rem;">
+              <span class="badge rounded-pill" style="background: rgba(148, 163, 184, 0.12); color: #94A3B8; border: 1px solid #334155; font-size: 0.68rem;">
                 ${typeLabels[doc.tipo_documento] || doc.tipo_documento}
               </span>
               ${statusBadge}
@@ -235,25 +243,24 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
           </div>
         </div>
         <div class="text-end">
-          <span class="fw-bold fs-6 text-dark d-block">${formatCurrency(doc.valor)}</span>
-          <small class="text-muted" style="font-size: 0.72rem;">${formatDate(doc.data_compra)}</small>
+          <span class="fw-bold fs-6 d-block" style="color: #F1F5F9;">${formatCurrency(doc.valor)}</span>
+          <small style="color: #94A3B8; font-size: 0.72rem;">${formatDate(doc.data_compra)}</small>
         </div>
       </div>
 
-      <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
-        <span class="text-muted small">
+      <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center" style="border-color: #334155 !important;">
+        <span class="small" style="color: #94A3B8;">
           ${doc.tipo_documento === 'assinatura'
-            ? `<i class="bi bi-arrow-repeat me-1"></i> Ciclo: <strong>${doc.meses_garantia || 1} mês(es)</strong>`
-            : `<i class="bi bi-clock-history me-1"></i> Validade: <strong>${doc.dataVencimento ? formatDate(doc.dataVencimento) : `${doc.meses_garantia || 0} meses`}</strong>`
+            ? `<i class="bi bi-arrow-repeat me-1"></i> Renovação: <strong style="color: #F1F5F9;">${doc.dataVencimento ? formatDate(doc.dataVencimento) : 'Mensal'}</strong>`
+            : `<i class="bi bi-clock-history me-1"></i> Garantia até: <strong style="color: #F1F5F9;">${doc.dataVencimento ? formatDate(doc.dataVencimento) : `${doc.meses_garantia || 0} meses`}</strong>`
           }
         </span>
-        <button class="btn btn-sm btn-link text-danger p-0 delete-doc-btn" data-id="${doc.id}" aria-label="Remover">
+        <button class="btn btn-sm btn-link p-0 delete-doc-btn" data-id="${doc.id}" aria-label="Remover" style="color: #EF4444;">
           <i class="bi bi-trash3"></i>
         </button>
       </div>
     `;
 
-    // Handler de exclusão
     const deleteBtn = card.querySelector('.delete-doc-btn');
     if (deleteBtn && onDelete) {
       deleteBtn.addEventListener('click', (e) => {
@@ -280,7 +287,6 @@ export function populateModalForm(data = {}) {
   if (inputData) inputData.value = data.data_compra || new Date().toISOString().split('T')[0];
   if (inputMeses) inputMeses.value = data.meses_garantia ?? 12;
 
-  // Marcação do radio do tipo
   const tipo = data.tipo_documento || 'garantia';
   const radio = document.querySelector(`input[name="tipo_documento"][value="${tipo}"]`);
   if (radio) radio.checked = true;

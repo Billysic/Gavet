@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
-  <!-- Fundo Dark Mode #121212 -->
-  <rect width="64" height="64" rx="16" fill="#121212" />
+  <!-- Fundo Azul Noturno #0F172A -->
+  <rect width="64" height="64" rx="16" fill="#0F172A" />
   
-  <!-- Ícone Gavet: Traço único contínuo (Gaveta entreaberta + Check) -->
+  <!-- Traço Único Contínuo (Gaveta entreaberta + Checkmark Verde Menta / Branco) -->
   <path d="M 14 28 
            L 14 44 
            C 14 47.3 16.7 50 20 50 
@@ -15,7 +15,7 @@
            L 19 28 
            L 26 37 
            L 49 14" 
-        stroke="#FFFFFF" 
+        stroke="#F1F5F9" 
         stroke-width="2.8" 
         stroke-linecap="round" 
         stroke-linejoin="round" />

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
-  <!-- Fundo Dark Mode #121212 -->
-  <rect width="192" height="192" rx="44" fill="#121212" />
+  <!-- Fundo Azul Noturno #0F172A -->
+  <rect width="192" height="192" rx="44" fill="#0F172A" />
 
   <!-- Símbolo Monoline Gavet escalado -->
   <g transform="translate(24, 24) scale(2.25)">
@@ -16,7 +16,7 @@
              L 19 28 
              L 26 37 
              L 49 14" 
-          stroke="#FFFFFF" 
+          stroke="#F1F5F9" 
           stroke-width="2.6" 
           stroke-linecap="round" 
           stroke-linejoin="round" />

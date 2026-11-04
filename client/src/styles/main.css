@@ -1,18 +1,30 @@
 /* ==========================================================================
-   Gaveta Inteligente - Estilos Mobile-First & Thumb-Zone Ergonomics
+   Gaveta Inteligente (Gavet) - Design System & Dark Mode Palette
    ========================================================================== */
 
 :root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --urgency-danger: #ef4444;
-  --urgency-warning: #f59e0b;
-  --urgency-success: #10b981;
+  /* Paleta Oficial */
+  --bg-main: #0F172A;          /* Azul Noturno (Fundo Principal) */
+  --surface-card: #1E293B;     /* Azul Aço (Superfície dos Cards e Nav) */
+  --action-primary: #10B981;   /* Verde Menta (Ação Principal / Sucesso) */
+  --action-hover: #059669;     /* Verde Menta Escurecido */
+  --text-primary: #F1F5F9;     /* Off-White (Títulos e Destaques) */
+  --text-secondary: #94A3B8;   /* Azul Desbotado (Subtítulos e Datas) */
+  --border-color: #334155;     /* Borda suave Slate-700 */
+
+  /* Cores Semânticas de Alertas */
+  --urgency-danger: #EF4444;                  /* Vermelho Coral (Urgente) */
+  --urgency-danger-bg: rgba(239, 68, 68, 0.15);
+  --urgency-warning: #F59E0B;                 /* Amarelo Âmbar (Atenção) */
+  --urgency-warning-bg: rgba(245, 158, 11, 0.15);
+  --urgency-success: #10B981;                 /* Verde Esmeralda (Seguro) */
+  --urgency-success-bg: rgba(16, 185, 129, 0.15);
+
   --card-radius: 16px;
   --fab-size: 62px;
 }
 
-/* Otimização de toque e renderização mobile */
+/* Otimização de toque e renderização */
 * {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
@@ -20,25 +32,45 @@
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
   min-height: 100vh;
-  padding-bottom: 90px !important; /* Espaço para não cobrir itens com o FAB */
+  padding-bottom: 96px !important;
 }
 
-/* Marca e Ícones */
+/* Header & Barra Superior */
+header.navbar {
+  background-color: var(--bg-main) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
 .brand-icon {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, var(--primary-color), #818cf8);
+  width: 38px;
+  height: 38px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
 }
 
 .brand-title {
-  letter-spacing: -0.02em;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.03em;
 }
 
 /* Status Pill (Online / Offline) */
 .status-pill {
   transition: all 0.3s ease;
+}
+
+.status-pill.online {
+  background-color: var(--urgency-success-bg) !important;
+  color: var(--action-primary) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.status-pill.offline {
+  background-color: var(--urgency-warning-bg) !important;
+  color: var(--urgency-warning) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
 }
 
 .status-dot {
@@ -49,10 +81,10 @@ body {
 }
 
 .status-dot.pulse {
-  animation: pulse-animation 2s infinite;
+  animation: pulse-mint 2s infinite;
 }
 
-@keyframes pulse-animation {
+@keyframes pulse-mint {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
   70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
@@ -67,7 +99,23 @@ body {
   scrollbar-width: none;
 }
 
-/* Radar de Urgência (Scroll Horizontal no Mobile) */
+/* Cards Métricos */
+.metric-card {
+  background-color: var(--surface-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--card-radius);
+}
+
+.metric-card small {
+  color: var(--text-secondary) !important;
+}
+
+.metric-number {
+  color: var(--action-primary);
+  font-weight: 700;
+}
+
+/* Radar de Urgência */
 .urgency-scroll-row {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -77,9 +125,8 @@ body {
 .urgency-scroll-row::-webkit-scrollbar {
   height: 4px;
 }
-
 .urgency-scroll-row::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-color);
   border-radius: 4px;
 }
 
@@ -89,55 +136,74 @@ body {
   scroll-snap-align: start;
   border-radius: var(--card-radius);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border-left-width: 6px !important;
+  border-left-width: 5px !important;
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .urgency-card:active {
   transform: scale(0.98);
 }
 
-/* Indicadores de Nível de Urgência */
+/* Níveis Semânticos de Alerta */
 .border-urgency-critical {
   border-left-color: var(--urgency-danger) !important;
-  background: linear-gradient(to right, rgba(239, 68, 68, 0.04), #ffffff);
+  background-color: var(--urgency-danger-bg) !important;
 }
 
 .border-urgency-warning {
   border-left-color: var(--urgency-warning) !important;
-  background: linear-gradient(to right, rgba(245, 158, 11, 0.04), #ffffff);
+  background-color: var(--urgency-warning-bg) !important;
 }
 
 .border-urgency-safe {
   border-left-color: var(--urgency-success) !important;
-  background: linear-gradient(to right, rgba(16, 185, 129, 0.04), #ffffff);
+  background-color: var(--urgency-success-bg) !important;
 }
 
-/* Cards de Itens da Gaveta */
+/* Cards da Lista Principal (Minha Gaveta) */
 .doc-card {
   border-radius: var(--card-radius);
-  border: 1px solid #e2e8f0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  background: #ffffff;
+  border: 1px solid var(--border-color) !important;
+  background-color: var(--surface-card) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
 }
 
 .doc-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #475569 !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.doc-card .text-muted,
+.doc-card small {
+  color: var(--text-secondary) !important;
 }
 
 /* Botões de Filtro */
 .filter-btn {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
   transition: all 0.2s ease;
+  background-color: var(--surface-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.filter-btn:hover {
+  background-color: #273549;
+  color: var(--text-primary);
+  border-color: #475569;
 }
 
 .filter-btn.active {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-  border-color: #0f172a !important;
+  background-color: var(--action-primary) !important;
+  color: #0F172A !important;
+  border-color: var(--action-primary) !important;
+  font-weight: 700;
 }
 
-/* BOTÃO MÁGICO (FAB - Floating Action Button) */
+/* BOTÃO MÁGICO (FAB) */
 .fab-btn {
   position: fixed;
   bottom: 24px;
@@ -148,36 +214,110 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: var(--action-primary);
   border: none;
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
 }
 
+.fab-btn i {
+  color: #0F172A; /* Ícone escuro em contraste com o Verde Menta */
+}
+
 .fab-btn:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
-  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.55);
+  background: var(--action-hover);
+  box-shadow: 0 10px 28px rgba(16, 185, 129, 0.55);
 }
 
 .fab-btn:active {
   transform: scale(0.92);
 }
 
-/* Ação Tátil dentro do Modal */
+/* BOTTOM SHEET MODAL (Dark Mode) */
+.modal-content {
+  background-color: var(--surface-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.bottom-sheet-handle {
+  background-color: var(--border-color) !important;
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%);
+}
+
+/* Inputs & Controles de Formulário */
+.form-control, .form-select {
+  background-color: var(--bg-main) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--action-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.2) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control::placeholder {
+  color: #64748B !important;
+}
+
+.input-group-text {
+  background-color: #172234 !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Cards de Ação de Upload no Modal */
 .touch-action-card {
   cursor: pointer;
-  border: 2px dashed #cbd5e1;
-  background-color: #ffffff;
+  border: 2px dashed var(--border-color);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   transition: all 0.2s ease;
 }
 
 .touch-action-card:hover, .touch-action-card:active {
-  border-color: var(--primary-color);
-  background-color: #eef2ff;
+  border-color: var(--action-primary);
+  background-color: rgba(16, 185, 129, 0.08);
   transform: translateY(-2px);
 }
 
-/* BOTTOM SHEET MODAL (Otimização para o Polegar em Mobile) */
+/* Botões de Ação Principal (Verde Menta) */
+.btn-primary {
+  background-color: var(--action-primary) !important;
+  border-color: var(--action-primary) !important;
+  color: #0F172A !important;
+  font-weight: 700;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--action-hover) !important;
+  border-color: var(--action-hover) !important;
+  color: #0F172A !important;
+}
+
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--action-primary) !important;
+  border-color: var(--action-primary) !important;
+  color: #0F172A !important;
+  font-weight: 700;
+}
+
+.btn-outline-primary {
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Responsividade Mobile Bottom Sheet */
 @media (max-width: 576px) {
   .modal-dialog-bottom-sheet {
     position: fixed;
