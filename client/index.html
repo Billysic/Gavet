@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="description" content="Gaveta Inteligente - Gerenciador offline-first de notas fiscais, garantias e assinaturas." />
+  <title>Gaveta Inteligente</title>
+  
+  <!-- Manifest PWA e Ícones -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+  
+  <!-- Bootstrap CSS & Bootstrap Icons via JS Bundler -->
+</head>
+<body class="bg-light text-dark pb-5">
+  <!-- Header / Barra de Navegação Superior -->
+  <header class="navbar navbar-expand sticky-top bg-white border-bottom shadow-sm py-2 px-3">
+    <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <div class="brand-icon d-flex align-items-center justify-content-center bg-primary text-white rounded-3">
+          <i class="bi bi-safe2-fill fs-5"></i>
+        </div>
+        <div>
+          <h1 class="h6 mb-0 fw-bold brand-title">Gaveta Inteligente</h1>
+          <small class="text-muted d-block" style="font-size: 0.75rem;">Assistente Financeiro</small>
+        </div>
+      </div>
+      
+      <!-- Indicador de Status Online / Offline -->
+      <div id="connection-status" class="status-pill badge rounded-pill d-flex align-items-center gap-1 bg-success-subtle text-success border border-success-subtle px-2 py-1">
+        <span class="status-dot bg-success"></span>
+        <span class="status-text fw-medium" style="font-size: 0.72rem;">Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="container my-3 px-3">
+    
+    <!-- DASHBOARD DE URGÊNCIA -->
+    <section id="urgency-section" class="mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h6 fw-bold mb-0 text-secondary text-uppercase tracking-wide" style="font-size: 0.8rem;">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Radar de Urgência
+        </h2>
+        <span id="urgency-count-badge" class="badge bg-danger rounded-pill">0 alertas</span>
+      </div>
+
+      <!-- Container Dinâmico de Cards de Urgência -->
+      <div id="urgency-cards-container" class="urgency-scroll-row d-flex gap-2 pb-2">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+    </section>
+
+    <!-- RESUMO RÁPIDO / METRICS -->
+    <section class="row g-2 mb-4">
+      <div class="col-4">
+        <div class="card metric-card border-0 shadow-sm text-center p-2 rounded-3 bg-white">
+          <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;">Garantias</small>
+          <span id="count-garantias" class="fw-bold fs-5 text-primary">0</span>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card metric-card border-0 shadow-sm text-center p-2 rounded-3 bg-white">
+          <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;">Assinaturas</small>
+          <span id="count-assinaturas" class="fw-bold fs-5 text-info">0</span>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card metric-card border-0 shadow-sm text-center p-2 rounded-3 bg-white">
+          <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;">Notas Fiscais</small>
+          <span id="count-notas" class="fw-bold fs-5 text-success">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTROS POR CATEGORIA (Pills com scroll horizontal) -->
+    <section class="mb-3">
+      <div class="d-flex gap-2 overflow-x-auto pb-1 no-scrollbar" role="tablist">
+        <button class="btn btn-sm btn-dark rounded-pill px-3 py-1 text-nowrap filter-btn active" data-filter="todos">
+          Todos
+        </button>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap filter-btn" data-filter="garantia">
+          <i class="bi bi-shield-check me-1"></i> Garantias
+        </button>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap filter-btn" data-filter="assinatura">
+          <i class="bi bi-arrow-repeat me-1"></i> Assinaturas
+        </button>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap filter-btn" data-filter="nota_fiscal">
+          <i class="bi bi-receipt me-1"></i> Notas Fiscais
+        </button>
+      </div>
+    </section>
+
+    <!-- LISTA DE DOCUMENTOS SALVOS -->
+    <section>
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h6 fw-bold mb-0 text-secondary text-uppercase tracking-wide" style="font-size: 0.8rem;">
+          Minha Gaveta
+        </h2>
+        <span id="total-items-count" class="text-muted small">0 itens</span>
+      </div>
+
+      <div id="documents-list" class="d-flex flex-column gap-3">
+        <!-- Itens inseridos dinamicamente pelo ui.js -->
+      </div>
+
+      <!-- Estado Vazio (Empty State) -->
+      <div id="empty-state" class="text-center py-5 d-none">
+        <div class="empty-icon-wrap bg-light border rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+          <i class="bi bi-inbox text-muted fs-2"></i>
+        </div>
+        <h3 class="h6 fw-bold text-dark">Sua gaveta está vazia</h3>
+        <p class="text-muted small mb-3">Tire uma foto da sua primeira nota fiscal ou comprovante no botão abaixo.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- BOTÃO MÁGICO (FAB - Floating Action Button) -->
+  <button id="fab-magic-btn" class="btn btn-primary rounded-circle shadow-lg fab-btn" type="button" data-bs-toggle="modal" data-bs-target="#magicModal" aria-label="Adicionar Documento">
+    <i class="bi bi-plus-lg fs-2 text-white"></i>
+  </button>
+
+  <!-- MODAL / BOTTOM SHEET DO BOTÃO MÁGICO (Thumb-Friendly) -->
+  <div class="modal fade" id="magicModal" tabindex="-1" aria-labelledby="magicModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-bottom-sheet">
+      <div class="modal-content rounded-top-4 border-0 shadow-lg">
+        
+        <!-- Puxador tátil (Handle bar para gesto de toque) -->
+        <div class="bottom-sheet-handle mx-auto my-2 rounded-pill bg-secondary-subtle" style="width: 40px; height: 5px;"></div>
+
+        <div class="modal-header border-0 pb-0 pt-1 px-4">
+          <div>
+            <h2 class="modal-title h5 fw-bold text-dark mb-0" id="magicModalLabel">
+              <i class="bi bi-stars text-primary me-1"></i> Botão Mágico
+            </h2>
+            <small class="text-muted">Extraia dados automaticamente com Gemini AI</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+
+        <div class="modal-body px-4 py-3">
+          
+          <!-- ZONA DE AÇÃO DO POLEGAR: BOTÕES DE UPLOAD RÁPIDO -->
+          <div id="upload-action-buttons" class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="camera-input" class="btn btn-outline-primary w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center touch-action-card">
+                <i class="bi bi-camera-fill fs-2 mb-1 text-primary"></i>
+                <span class="fw-bold small">Tirar Foto</span>
+                <span class="text-muted" style="font-size: 0.68rem;">Câmera traseira</span>
+              </label>
+              <!-- Input nativo de câmera para smartphones -->
+              <input type="file" id="camera-input" accept="image/*" capture="environment" class="d-none" />
+            </div>
+
+            <div class="col-6">
+              <label for="file-input" class="btn btn-outline-secondary w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center touch-action-card">
+                <i class="bi bi-file-earmark-arrow-up-fill fs-2 mb-1 text-secondary"></i>
+                <span class="fw-bold small">PDF / Galeria</span>
+                <span class="text-muted" style="font-size: 0.68rem;">Escolher arquivo</span>
+              </label>
+              <!-- Input para seleção de arquivos e PDFs -->
+              <input type="file" id="file-input" accept="image/*,application/pdf" class="d-none" />
+            </div>
+          </div>
+
+          <!-- FEEDBACK DE PROCESSAMENTO DA IA (SPINNER + STATUS) -->
+          <div id="ai-loading-container" class="alert alert-primary border-primary-subtle d-none p-3 rounded-3 text-center my-3">
+            <div class="spinner-border text-primary mb-2" role="status">
+              <span class="visually-hidden">Processando...</span>
+            </div>
+            <h3 class="h6 fw-bold mb-1">O Gemini está lendo seu documento...</h3>
+            <p class="text-muted small mb-0">Identificando loja, valor, datas e garantias via OCR inteligente.</p>
+          </div>
+
+          <!-- PRÉ-VISUALIZAÇÃO DO ARQUIVO SELECIONADO -->
+          <div id="file-preview-container" class="d-none align-items-center justify-content-between p-2 mb-3 rounded-3 bg-light border">
+            <div class="d-flex align-items-center gap-2 text-truncate">
+              <i class="bi bi-image text-primary fs-4"></i>
+              <span id="file-name-preview" class="small fw-medium text-truncate">comprovante.jpg</span>
+            </div>
+            <button id="btn-remove-file" class="btn btn-sm btn-link text-danger p-0" type="button">
+              <i class="bi bi-x-circle-fill fs-5"></i>
+            </button>
+          </div>
+
+          <!-- FORMULÁRIO DE REVISÃO E CONFIRMAÇÃO (Campos preenchidos pela IA ou manualmente) -->
+          <form id="document-form" class="mt-2">
+            <div class="row g-2">
+              
+              <!-- Tipo de Documento -->
+              <div class="col-12">
+                <label class="form-label small fw-bold mb-1">Tipo de Registro</label>
+                <div class="btn-group w-100" role="group" aria-label="Tipo de documento">
+                  <input type="radio" class="btn-check" name="tipo_documento" id="type-garantia" value="garantia" checked />
+                  <label class="btn btn-outline-primary btn-sm py-2" for="type-garantia">Garantia</label>
+
+                  <input type="radio" class="btn-check" name="tipo_documento" id="type-assinatura" value="assinatura" />
+                  <label class="btn btn-outline-primary btn-sm py-2" for="type-assinatura">Assinatura</label>
+
+                  <input type="radio" class="btn-check" name="tipo_documento" id="type-nota" value="nota_fiscal" />
+                  <label class="btn btn-outline-primary btn-sm py-2" for="type-nota">Nota Fiscal</label>
+                </div>
+              </div>
+
+              <!-- Loja / Fornecedor -->
+              <div class="col-12">
+                <label for="input-loja" class="form-label small fw-bold mb-1">Loja ou Serviço</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text"><i class="bi bi-shop"></i></span>
+                  <input type="text" id="input-loja" class="form-control form-control-lg fs-6" placeholder="Ex: Amazon, Apple, Netflix" required />
+                </div>
+              </div>
+
+              <!-- Valor e Data da Compra -->
+              <div class="col-6">
+                <label for="input-valor" class="form-label small fw-bold mb-1">Valor (R$)</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">R$</span>
+                  <input type="number" step="0.01" id="input-valor" class="form-control form-control-lg fs-6" placeholder="0,00" required />
+                </div>
+              </div>
+
+              <div class="col-6">
+                <label for="input-data" class="form-label small fw-bold mb-1">Data da Compra</label>
+                <input type="date" id="input-data" class="form-control form-control-lg fs-6" required />
+              </div>
+
+              <!-- Meses de Garantia (ou Período de Assinatura) -->
+              <div class="col-12" id="garantia-field-group">
+                <label for="input-meses" class="form-label small fw-bold mb-1">
+                  Prazo de Garantia / Validade
+                </label>
+                <div class="input-group input-group-sm">
+                  <input type="number" id="input-meses" class="form-control form-control-lg fs-6" placeholder="12" min="0" value="12" />
+                  <span class="input-group-text">meses</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- BOTÃO PRINCIPAL DE CONFIRMAÇÃO (Ergonomia do polegar: Largo e na base) -->
+            <div class="mt-4 pt-1">
+              <button type="submit" id="btn-save-document" class="btn btn-primary w-100 py-3 rounded-3 fw-bold fs-6 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-check2-circle fs-5"></i>
+                <span>Salvar na Gaveta</span>
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOASTS DE NOTIFICAÇÃO -->
+  <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1100;">
+    <div id="app-toast" class="toast align-items-center text-bg-dark border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2 py-3 px-3">
+          <i id="toast-icon" class="bi bi-info-circle-fill text-info fs-5"></i>
+          <span id="toast-message" class="small">Ação concluída com sucesso.</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

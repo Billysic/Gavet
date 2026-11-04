@@ -1,0 +1,20 @@
+{
+  "name": "gaveta-inteligente-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "idb": "^8.0.2"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}

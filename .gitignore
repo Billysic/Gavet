@@ -1,0 +1,21 @@
+# Dependências
+node_modules/
+
+# Builds
+dist/
+
+# Uploads temporários
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Banco SQLite local
+server/*.db
+server/*.db-journal
+
+# Variáveis de ambiente
+.env
+server/.env
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
