@@ -30,7 +30,9 @@ import {
   showToast,
   setAiLoadingState,
   populateModalForm,
-  setModalMode
+  setModalMode,
+  setupCurrencyMask,
+  parseBRLInput
 } from './src/js/ui.js';
 
 // Disponibiliza o objeto bootstrap globalmente para componentes dinâmicos (Modals, Toasts)
@@ -52,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFilterButtons();
   setupUploadTriggers();
   setupDocumentForm();
+  setupCurrencyMask(document.getElementById('input-valor'));
 
   // Carrega os dados reais do IndexedDB (semeia itens demo no primeiro acesso)
   await loadDocumentsFromDB();
@@ -234,7 +237,7 @@ function setupDocumentForm() {
     const editId = document.getElementById('input-edit-id')?.value;
     const selectedType = form.querySelector('input[name="tipo_documento"]:checked')?.value || 'garantia';
     const loja = document.getElementById('input-loja').value.trim();
-    const valor = parseFloat(document.getElementById('input-valor').value) || 0;
+    const valor = parseBRLInput(document.getElementById('input-valor').value);
     const dataCompra = document.getElementById('input-data').value;
     const meses = parseInt(document.getElementById('input-meses').value, 10) || 0;
 

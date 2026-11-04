@@ -3,13 +3,53 @@
  * Design System Dark Mode: Azul Noturno (#0F172A), Azul Aço (#1E293B) e Verde Menta (#10B981)
  */
 
-// Formatação monetária padrão BRL
+// Formatação monetária padrão BRL para exibição (ex: R$ 1.499,90)
 export function formatCurrency(value) {
   const number = Number(value) || 0;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(number);
+}
+
+// Formatação de valor decimal para string de input brasileiro (ex: 1499.9 -> "1.499,90")
+export function formatBRLInput(value) {
+  if (value === '' || value === null || value === undefined) return '';
+  const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.')) || 0;
+  return num.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// Conversão de valor formatado em BRL para float numérico (ex: "1.499,90" -> 1499.90)
+export function parseBRLInput(str) {
+  if (!str) return 0;
+  const clean = String(str).replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
+  return parseFloat(clean) || 0;
+}
+
+/**
+ * Aplica máscara de moeda BRL em tempo real com vírgula automática de centavos
+ * Conforme o usuário digita números no teclado, a vírgula é posicionada automaticamente
+ */
+export function setupCurrencyMask(inputElement) {
+  if (!inputElement) return;
+
+  inputElement.addEventListener('input', (e) => {
+    const rawDigits = e.target.value.replace(/\D/g, '');
+
+    if (!rawDigits) {
+      e.target.value = '';
+      return;
+    }
+
+    const numericValue = parseInt(rawDigits, 10) / 100;
+    e.target.value = numericValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  });
 }
 
 // Formatação de data padrão DD/MM/AAAA
@@ -131,7 +171,6 @@ export function renderUrgencyRadar(urgentItems = [], onEdit) {
     const isCritical = item.nivelUrgencia === 'critico' || item.nivelUrgencia === 'hoje' || item.nivelUrgencia === 'expirado';
     const borderClass = isCritical ? 'border-urgency-critical' : 'border-urgency-warning';
     
-    // Cores Semânticas de Alerta
     const badgeStyle = isCritical
       ? 'background: rgba(239, 68, 68, 0.25); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4);'
       : 'background: rgba(245, 158, 11, 0.25); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4);';
@@ -228,7 +267,6 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
       nota_fiscal: 'Nota Fiscal'
     };
 
-    // Cores Semânticas nos Badges dos cards
     let statusBadge = '';
     if (doc.diasRestantes !== undefined) {
       if (doc.diasRestantes < 0) {
@@ -280,7 +318,6 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
       </div>
     `;
 
-    // Handler de Edição
     const editBtn = card.querySelector('.edit-doc-btn');
     if (editBtn && onEdit) {
       editBtn.addEventListener('click', (e) => {
@@ -289,7 +326,6 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
       });
     }
 
-    // Handler de Exclusão
     const deleteBtn = card.querySelector('.delete-doc-btn');
     if (deleteBtn && onDelete) {
       deleteBtn.addEventListener('click', (e) => {
@@ -358,7 +394,7 @@ export function setModalMode(mode = 'create', data = {}) {
 }
 
 /**
- * Preenche os inputs do formulário no modal com os dados extraídos
+ * Preenche os inputs do formulário no modal com os dados extraídos ou para edição
  */
 export function populateModalForm(data = {}) {
   const inputLoja = document.getElementById('input-loja');
@@ -367,7 +403,14 @@ export function populateModalForm(data = {}) {
   const inputMeses = document.getElementById('input-meses');
 
   if (inputLoja) inputLoja.value = data.loja || '';
-  if (inputValor) inputValor.value = data.valor || '';
+  
+  // Aplica a formatação BRL com vírgula no campo de valor
+  if (inputValor) {
+    inputValor.value = data.valor !== undefined && data.valor !== '' 
+      ? formatBRLInput(data.valor) 
+      : '';
+  }
+
   if (inputData) inputData.value = data.data_compra || new Date().toISOString().split('T')[0];
   if (inputMeses) inputMeses.value = data.meses_garantia ?? 12;
 
