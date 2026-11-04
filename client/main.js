@@ -29,7 +29,8 @@ import {
   updateMetrics,
   showToast,
   setAiLoadingState,
-  populateModalForm
+  populateModalForm,
+  setModalMode
 } from './src/js/ui.js';
 
 // Disponibiliza o objeto bootstrap globalmente para componentes dinâmicos (Modals, Toasts)
@@ -216,30 +217,64 @@ async function trySyncWithBackend() {
 function setupDocumentForm() {
   const form = document.getElementById('document-form');
   const modalEl = document.getElementById('magicModal');
+  const fabBtn = document.getElementById('fab-magic-btn');
+
+  // Ao clicar no FAB, garante que o modal abre no modo de criação limpo
+  if (fabBtn) {
+    fabBtn.addEventListener('click', () => {
+      setModalMode('create');
+    });
+  }
 
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const editId = document.getElementById('input-edit-id')?.value;
     const selectedType = form.querySelector('input[name="tipo_documento"]:checked')?.value || 'garantia';
     const loja = document.getElementById('input-loja').value.trim();
     const valor = parseFloat(document.getElementById('input-valor').value) || 0;
     const dataCompra = document.getElementById('input-data').value;
     const meses = parseInt(document.getElementById('input-meses').value, 10) || 0;
 
-    const newDoc = {
-      loja,
-      valor,
-      data_compra: dataCompra,
-      meses_garantia: meses,
-      tipo_documento: selectedType
-    };
-
     try {
-      // Salva diretamente no IndexedDB
-      const savedDoc = await saveDocument(newDoc);
-      appState.documents.unshift(savedDoc);
+      if (editId) {
+        // MODO EDIÇÃO: Atualiza documento existente mantendo o ID e data de criação
+        const existingDoc = appState.documents.find(d => d.id === editId);
+        const updatedDoc = {
+          ...existingDoc,
+          id: editId,
+          loja,
+          valor,
+          data_compra: dataCompra,
+          meses_garantia: meses,
+          tipo_documento: selectedType,
+          synced: 0 // Marca para sincronizar a alteração com o servidor
+        };
+
+        const saved = await saveDocument(updatedDoc);
+        const index = appState.documents.findIndex(d => d.id === editId);
+        if (index !== -1) {
+          appState.documents[index] = saved;
+        }
+
+        showToast('Lembrete atualizado com sucesso!', 'success');
+      } else {
+        // MODO CRIAÇÃO: Novo documento
+        const newDoc = {
+          loja,
+          valor,
+          data_compra: dataCompra,
+          meses_garantia: meses,
+          tipo_documento: selectedType
+        };
+
+        const savedDoc = await saveDocument(newDoc);
+        appState.documents.unshift(savedDoc);
+        showToast('Documento guardado na Gavet!', 'success');
+      }
+
       refreshUI();
 
       // Fecha o modal
@@ -250,15 +285,30 @@ function setupDocumentForm() {
 
       form.reset();
       document.getElementById('btn-remove-file')?.click();
-      showToast('Documento guardado na Gaveta!', 'success');
 
       // Tenta sincronizar em background se estiver conectado
       trySyncWithBackend();
     } catch (err) {
-      console.error('Falha ao salvar no IndexedDB:', err);
+      console.error('Falha ao gravar no IndexedDB:', err);
       showToast('Erro ao salvar localmente.', 'danger');
     }
   });
+}
+
+/**
+ * Abre o modal preenchido no modo de edição para o documento selecionado
+ */
+function handleEditDocument(id) {
+  const doc = appState.documents.find(d => d.id === id);
+  if (!doc) return;
+
+  setModalMode('edit', doc);
+
+  const modalEl = document.getElementById('magicModal');
+  if (modalEl && window.bootstrap?.Modal) {
+    const modalInstance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalInstance.show();
+  }
 }
 
 /**
@@ -286,9 +336,9 @@ function refreshUI() {
   // Alertas prioritários para o Radar de Urgência (ordenados por gravidade)
   const urgentAlerts = getUrgentAlerts(appState.documents);
 
-  renderUrgencyRadar(urgentAlerts);
+  renderUrgencyRadar(urgentAlerts, handleEditDocument);
   updateMetrics(enrichedDocuments);
-  renderDocumentsList(enrichedDocuments, appState.activeFilter, handleDeleteDocument);
+  renderDocumentsList(enrichedDocuments, appState.activeFilter, handleDeleteDocument, handleEditDocument);
 }
 
 /**

@@ -94,7 +94,7 @@ export function setAiLoadingState(isLoading) {
 /**
  * Renderiza o Radar de Urgência no topo do Dashboard
  */
-export function renderUrgencyRadar(urgentItems = []) {
+export function renderUrgencyRadar(urgentItems = [], onEdit) {
   const container = document.getElementById('urgency-cards-container');
   const countBadge = document.getElementById('urgency-count-badge');
   if (!container) return;
@@ -146,7 +146,12 @@ export function renderUrgencyRadar(urgentItems = []) {
           <i class="bi ${icon} me-1"></i>
           ${item.labelUrgencia}
         </span>
-        <span class="fw-bold" style="color: #F1F5F9;">${formatCurrency(item.valor)}</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold" style="color: #F1F5F9;">${formatCurrency(item.valor)}</span>
+          <button class="btn btn-sm btn-link p-0 edit-urgency-btn" data-id="${item.id}" aria-label="Editar Lembrete" style="color: #38BDF8; font-size: 0.9rem;">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+        </div>
       </div>
       <h3 class="h6 fw-bold mb-1 text-truncate" style="color: #F1F5F9;">${item.loja}</h3>
       <div class="d-flex justify-content-between align-items-center small" style="color: #94A3B8;">
@@ -154,6 +159,15 @@ export function renderUrgencyRadar(urgentItems = []) {
         <span class="text-capitalize">${item.tipo_documento}</span>
       </div>
     `;
+
+    const editBtn = card.querySelector('.edit-urgency-btn');
+    if (editBtn && onEdit) {
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onEdit(item.id);
+      });
+    }
+
     container.appendChild(card);
   });
 }
@@ -180,7 +194,7 @@ export function updateMetrics(documents = []) {
 /**
  * Renderiza a lista principal de documentos (Minha Gaveta)
  */
-export function renderDocumentsList(documents = [], activeFilter = 'todos', onDelete) {
+export function renderDocumentsList(documents = [], activeFilter = 'todos', onDelete, onEdit) {
   const listContainer = document.getElementById('documents-list');
   const emptyState = document.getElementById('empty-state');
   if (!listContainer) return;
@@ -255,12 +269,27 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
             : `<i class="bi bi-clock-history me-1"></i> Garantia até: <strong style="color: #F1F5F9;">${doc.dataVencimento ? formatDate(doc.dataVencimento) : `${doc.meses_garantia || 0} meses`}</strong>`
           }
         </span>
-        <button class="btn btn-sm btn-link p-0 delete-doc-btn" data-id="${doc.id}" aria-label="Remover" style="color: #EF4444;">
-          <i class="bi bi-trash3"></i>
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-sm btn-link p-0 edit-doc-btn" data-id="${doc.id}" aria-label="Editar" style="color: #38BDF8; font-size: 0.95rem;">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button class="btn btn-sm btn-link p-0 delete-doc-btn" data-id="${doc.id}" aria-label="Remover" style="color: #EF4444; font-size: 0.95rem;">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
       </div>
     `;
 
+    // Handler de Edição
+    const editBtn = card.querySelector('.edit-doc-btn');
+    if (editBtn && onEdit) {
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onEdit(doc.id);
+      });
+    }
+
+    // Handler de Exclusão
     const deleteBtn = card.querySelector('.delete-doc-btn');
     if (deleteBtn && onDelete) {
       deleteBtn.addEventListener('click', (e) => {
@@ -271,6 +300,61 @@ export function renderDocumentsList(documents = [], activeFilter = 'todos', onDe
 
     listContainer.appendChild(card);
   });
+}
+
+/**
+ * Configura o modal para modo de criação ou modo de edição
+ * @param {'create'|'edit'} mode Modo de abertura
+ * @param {Object} [data] Dados do documento para edição
+ */
+export function setModalMode(mode = 'create', data = {}) {
+  const modalTitleIcon = document.getElementById('modal-title-icon');
+  const modalTitleText = document.getElementById('modal-title-text');
+  const modalSubtitleText = document.getElementById('modal-subtitle-text');
+  const uploadActionButtons = document.getElementById('upload-action-buttons');
+  const btnSaveText = document.getElementById('btn-save-text');
+  const btnSaveIcon = document.getElementById('btn-save-icon');
+  const inputEditId = document.getElementById('input-edit-id');
+  const filePreview = document.getElementById('file-preview-container');
+
+  if (filePreview) {
+    filePreview.classList.remove('d-flex');
+    filePreview.classList.add('d-none');
+  }
+
+  if (mode === 'edit') {
+    if (modalTitleIcon) {
+      modalTitleIcon.className = 'bi bi-pencil-square me-1';
+      modalTitleIcon.style.color = '#38BDF8';
+    }
+    if (modalTitleText) modalTitleText.textContent = 'Editar Lembrete';
+    if (modalSubtitleText) modalSubtitleText.textContent = 'Atualize as informações do seu registro';
+    if (uploadActionButtons) uploadActionButtons.classList.add('d-none');
+    if (btnSaveText) btnSaveText.textContent = 'Salvar Alterações';
+    if (btnSaveIcon) btnSaveIcon.className = 'bi bi-check-all fs-5';
+    if (inputEditId) inputEditId.value = data.id || '';
+
+    populateModalForm(data);
+  } else {
+    if (modalTitleIcon) {
+      modalTitleIcon.className = 'bi bi-stars me-1';
+      modalTitleIcon.style.color = '#10B981';
+    }
+    if (modalTitleText) modalTitleText.textContent = 'Botão Mágico';
+    if (modalSubtitleText) modalSubtitleText.textContent = 'Extraia dados automaticamente com Gemini AI';
+    if (uploadActionButtons) uploadActionButtons.classList.remove('d-none');
+    if (btnSaveText) btnSaveText.textContent = 'Salvar na Gavet';
+    if (btnSaveIcon) btnSaveIcon.className = 'bi bi-check2-circle fs-5';
+    if (inputEditId) inputEditId.value = '';
+
+    populateModalForm({
+      loja: '',
+      valor: '',
+      data_compra: new Date().toISOString().split('T')[0],
+      meses_garantia: 12,
+      tipo_documento: 'garantia'
+    });
+  }
 }
 
 /**

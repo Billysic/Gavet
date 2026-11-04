@@ -138,9 +138,10 @@
         <div class="modal-header border-0 pb-0 pt-1 px-4">
           <div>
             <h2 class="modal-title h5 fw-bold mb-0" id="magicModalLabel" style="color: #F1F5F9;">
-              <i class="bi bi-stars me-1" style="color: #10B981;"></i> Botão Mágico
+              <i id="modal-title-icon" class="bi bi-stars me-1" style="color: #10B981;"></i>
+              <span id="modal-title-text">Botão Mágico</span>
             </h2>
-            <small style="color: #94A3B8;">Extraia dados automaticamente com Gemini AI</small>
+            <small id="modal-subtitle-text" style="color: #94A3B8;">Extraia dados automaticamente com Gemini AI</small>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
@@ -190,6 +191,9 @@
 
           <!-- FORMULÁRIO DE REVISÃO E CONFIRMAÇÃO -->
           <form id="document-form" class="mt-2">
+            <!-- Campo oculto para armazenar o ID quando estiver no modo Edição -->
+            <input type="hidden" id="input-edit-id" value="" />
+
             <div class="row g-2">
               
               <!-- Tipo de Documento -->
@@ -246,8 +250,8 @@
             <!-- BOTÃO PRINCIPAL DE CONFIRMAÇÃO (Verde Menta #10B981) -->
             <div class="mt-4 pt-1">
               <button type="submit" id="btn-save-document" class="btn btn-primary w-100 py-3 rounded-3 fw-bold fs-6 shadow-sm d-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-check2-circle fs-5"></i>
-                <span>Salvar na Gavet</span>
+                <i id="btn-save-icon" class="bi bi-check2-circle fs-5"></i>
+                <span id="btn-save-text">Salvar na Gavet</span>
               </button>
             </div>
           </form>
