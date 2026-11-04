@@ -1,5 +1,5 @@
 {
-  "name": "gaveta-inteligente-client",
+  "name": "gavet-client",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -12,9 +12,7 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "idb": "^8.0.2"
-  },
-  "devDependencies": {
+    "idb": "^8.0.2",
     "vite": "^6.2.0"
   }
 }

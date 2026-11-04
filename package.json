@@ -1,13 +1,13 @@
 {
-  "name": "gaveta-inteligente",
+  "name": "gavet",
   "version": "1.0.0",
   "private": true,
-  "description": "PWA offline-first para gerenciamento de garantias, notas fiscais e assinaturas",
+  "description": "Gavet - PWA offline-first para gerenciamento de garantias, notas fiscais e assinaturas",
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
     "install:all": "npm install && npm install --prefix client && npm install --prefix server",
     "build:client": "npm run build --prefix client",
-    "build": "npm install --prefix client && npm run build --prefix client && npm install --prefix server",
+    "build": "npm install --prefix client --include=dev && npm run build --prefix client && npm install --prefix server",
     "start": "node server/src/server.js"
   },
   "devDependencies": {

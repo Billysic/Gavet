@@ -47,9 +47,9 @@ if (fs.existsSync(clientDistPath)) {
   });
 }
 
-// Inicialização do Servidor HTTP
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor da Gaveta Inteligente rodando na porta ${PORT}`);
+// Inicialização do Servidor HTTP vinculado a 0.0.0.0 (Obrigatório para deploy no Render/Linux)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor da Gavet rodando na porta ${PORT}`);
   console.log(`📡 Healthcheck: http://localhost:${PORT}/api/health`);
   console.log(`✨ OCR Gemini Endpoint: http://localhost:${PORT}/api/documents/analyze`);
 });

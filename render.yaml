@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: gaveta-inteligente
+    name: gavet
     env: node
     plan: free
     buildCommand: npm run build
