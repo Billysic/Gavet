@@ -1,11 +1,11 @@
 {
-  "name": "Gaveta Inteligente",
-  "short_name": "Gaveta",
-  "description": "Assistente financeiro offline-first para gerenciamento de garantias, notas fiscais e assinaturas.",
+  "name": "Gavet",
+  "short_name": "Gavet",
+  "description": "Organização concluída sem esforço. Gerenciador offline-first de notas fiscais, garantias e assinaturas.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#4f46e5",
+  "background_color": "#121212",
+  "theme_color": "#121212",
   "orientation": "portrait-primary",
   "icons": [
     {

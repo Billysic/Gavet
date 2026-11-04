@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f46e5" />
-  <meta name="description" content="Gaveta Inteligente - Gerenciador offline-first de notas fiscais, garantias e assinaturas." />
-  <title>Gaveta Inteligente</title>
+  <meta name="theme-color" content="#121212" />
+  <meta name="description" content="Gavet - Organização concluída sem esforço. Gerenciador offline-first de notas fiscais, garantias e assinaturas." />
+  <title>Gavet</title>
   
   <!-- Manifest PWA e Ícones -->
   <link rel="manifest" href="/manifest.json" />
@@ -19,12 +19,14 @@
   <header class="navbar navbar-expand sticky-top bg-white border-bottom shadow-sm py-2 px-3">
     <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center gap-2">
-        <div class="brand-icon d-flex align-items-center justify-content-center bg-primary text-white rounded-3">
-          <i class="bi bi-safe2-fill fs-5"></i>
+        <div class="brand-icon d-flex align-items-center justify-content-center rounded-3 bg-dark p-1 shadow-sm">
+          <svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 14 28 L 14 44 C 14 47.3 16.7 50 20 50 L 44 50 C 47.3 50 50 47.3 50 44 L 50 28 L 38 28 C 38 32.5 35 34.5 32 34.5 C 29 34.5 26 32.5 26 28 L 19 28 L 26 37 L 49 14" />
+          </svg>
         </div>
         <div>
-          <h1 class="h6 mb-0 fw-bold brand-title">Gaveta Inteligente</h1>
-          <small class="text-muted d-block" style="font-size: 0.75rem;">Assistente Financeiro</small>
+          <h1 class="h6 mb-0 fw-bold brand-title">Gavet</h1>
+          <small class="text-muted d-block" style="font-size: 0.72rem;">Organização sem esforço</small>
         </div>
       </div>
       
@@ -110,9 +112,11 @@
       <!-- Estado Vazio (Empty State) -->
       <div id="empty-state" class="text-center py-5 d-none">
         <div class="empty-icon-wrap bg-light border rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
-          <i class="bi bi-inbox text-muted fs-2"></i>
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none" stroke="#64748b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M 14 28 L 14 44 C 14 47.3 16.7 50 20 50 L 44 50 C 47.3 50 50 47.3 50 44 L 50 28 L 38 28 C 38 32.5 35 34.5 32 34.5 C 29 34.5 26 32.5 26 28 L 19 28 L 26 37 L 49 14" />
+          </svg>
         </div>
-        <h3 class="h6 fw-bold text-dark">Sua gaveta está vazia</h3>
+        <h3 class="h6 fw-bold text-dark">Sua Gavet está vazia</h3>
         <p class="text-muted small mb-3">Tire uma foto da sua primeira nota fiscal ou comprovante no botão abaixo.</p>
       </div>
     </section>
@@ -245,7 +249,7 @@
             <div class="mt-4 pt-1">
               <button type="submit" id="btn-save-document" class="btn btn-primary w-100 py-3 rounded-3 fw-bold fs-6 shadow-sm d-flex align-items-center justify-content-center gap-2">
                 <i class="bi bi-check2-circle fs-5"></i>
-                <span>Salvar na Gaveta</span>
+                <span>Salvar na Gavet</span>
               </button>
             </div>
           </form>
