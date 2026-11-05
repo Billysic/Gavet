@@ -10,10 +10,15 @@ import authRoutes from './routes/authRoutes.js';
 import { getDatabase } from './config/database.js';
 import { isSupabaseConfigured } from './config/supabase.js';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const serverEnvPath = path.resolve(__dirname, '../.env');
+if (fs.existsSync(serverEnvPath)) {
+  dotenv.config({ path: serverEnvPath });
+} else {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;

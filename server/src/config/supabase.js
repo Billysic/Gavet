@@ -1,22 +1,38 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Carrega .env de server/.env ou da raiz
+const serverEnvPath = path.resolve(__dirname, '../../.env');
+if (fs.existsSync(serverEnvPath)) {
+  dotenv.config({ path: serverEnvPath });
+} else {
+  dotenv.config();
+}
 
 let supabaseInstance = null;
+
+function getSupabaseConfig() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+  return { url, key };
+}
 
 /**
  * Verifica se as credenciais do Supabase foram configuradas no ambiente
  */
 export function isSupabaseConfigured() {
+  const { url, key } = getSupabaseConfig();
   return Boolean(
-    supabaseUrl &&
-    supabaseKey &&
-    supabaseUrl.startsWith('http') &&
-    !supabaseUrl.includes('sua-url-do-projeto')
+    url &&
+    key &&
+    url.startsWith('http') &&
+    !url.includes('sua-url-do-projeto')
   );
 }
 
@@ -28,7 +44,8 @@ export function getSupabase() {
     return null;
   }
   if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+    const { url, key } = getSupabaseConfig();
+    supabaseInstance = createClient(url, key, {
       auth: {
         autoRefreshToken: true,
         persistSession: false
