@@ -1728,12 +1728,9 @@ body {
 /* Chips Rápidos de Prazo (Substitui Select feio) */
 .term-chips-strip {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.term-chips-strip::-webkit-scrollbar {
-  display: none;
+  align-items: center;
 }
 
 .term-quick-chip {

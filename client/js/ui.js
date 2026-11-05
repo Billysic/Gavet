@@ -548,7 +548,7 @@ export function updateTermChips(months, forceCustomOpen = false) {
   const customExactDate = document.getElementById('input-custom-exact-date');
   const dataCompra = document.getElementById('doc-data-compra')?.value;
 
-  const presetValues = [1, 3, 6, 12, 24, 36, 60];
+  const presetValues = [1, 6, 12, 24];
   const isPreset = presetValues.includes(m) && !forceCustomOpen;
 
   chips.forEach(chip => {
