@@ -11,11 +11,13 @@
 [data-theme="dark"] {
   /* Cores Base: Obsidian Profundo (evita o visual padrão azulado de Tailwind) */
   --bg-void: #08090C;
+  --app-bg: rgba(8, 9, 12, 0.85);
   --bg-surface: #0E1017;
   --bg-surface-elevated: #151821;
   --bg-surface-hover: #1D212D;
   --bg-surface-active: #252A38;
   --bg-translucent: rgba(14, 16, 23, 0.82);
+  --bg-dock: rgba(21, 24, 33, 0.92);
 
   /* Micro-Bordas & Efeito Luz de Hardware */
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -28,6 +30,7 @@
   --accent-mint: #00F59B;
   --accent-mint-dim: rgba(0, 245, 155, 0.12);
   --accent-mint-glow: rgba(0, 245, 155, 0.28);
+  --accent-mint-contrast: #08090C;
   --accent-emerald: #10B981;
 
   /* Semântica de Urgência Calibrada */
@@ -62,6 +65,8 @@
   --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
+  --timeline-track-bg: rgba(255, 255, 255, 0.06);
+
   /* Raios de Curvatura Tácteis */
   --radius-xs: 6px;
   --radius-sm: 10px;
@@ -82,39 +87,42 @@
    TEMA CLARO: CLEAN PAPER (Minimalista, Alto Contraste, Esmeralda)
    -------------------------------------------------------------------------- */
 [data-theme="light"] {
-  --bg-void: #F4F6F9;
+  --bg-void: #EDF0F5;
+  --app-bg: #F4F6F9;
   --bg-surface: #FFFFFF;
   --bg-surface-elevated: #F8FAFC;
-  --bg-surface-hover: #EBEFF5;
-  --bg-surface-active: #E0E5ED;
-  --bg-translucent: rgba(255, 255, 255, 0.88);
+  --bg-surface-hover: #EEF2F6;
+  --bg-surface-active: #E2E8F0;
+  --bg-translucent: rgba(255, 255, 255, 0.92);
+  --bg-dock: #FFFFFF;
 
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-medium: rgba(0, 0, 0, 0.14);
-  --border-strong: rgba(0, 0, 0, 0.24);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-medium: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.22);
   --border-focus: #059669;
   --hardware-light: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
   --accent-mint: #059669;
   --accent-mint-dim: rgba(5, 150, 105, 0.12);
   --accent-mint-glow: rgba(5, 150, 105, 0.25);
+  --accent-mint-contrast: #FFFFFF;
   --accent-emerald: #10B981;
 
   --urgency-critical: #DC2626;
   --urgency-critical-bg: rgba(220, 38, 38, 0.08);
-  --urgency-critical-border: rgba(220, 38, 38, 0.3);
+  --urgency-critical-border: rgba(220, 38, 38, 0.28);
 
   --urgency-warning: #D97706;
   --urgency-warning-bg: rgba(217, 119, 6, 0.08);
-  --urgency-warning-border: rgba(217, 119, 6, 0.3);
+  --urgency-warning-border: rgba(217, 119, 6, 0.28);
 
   --urgency-safe: #059669;
   --urgency-safe-bg: rgba(5, 150, 105, 0.08);
-  --urgency-safe-border: rgba(5, 150, 105, 0.3);
+  --urgency-safe-border: rgba(5, 150, 105, 0.28);
 
   --urgency-expired: #6B7280;
   --urgency-expired-bg: rgba(107, 114, 128, 0.08);
-  --urgency-expired-border: rgba(107, 114, 128, 0.25);
+  --urgency-expired-border: rgba(107, 114, 128, 0.22);
 
   --color-warranty: #059669;
   --color-subscription: #7C3AED;
@@ -122,14 +130,16 @@
   --color-invoice: #0284C7;
   --color-invoice-bg: rgba(2, 132, 199, 0.08);
 
-  --text-pure: #090B0E;
-  --text-primary: #191D24;
-  --text-secondary: #4B5565;
+  --text-pure: #0F172A;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
   --text-muted: #64748B;
 
-  --shadow-dock: 0 16px 40px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
-  --shadow-sheet: 0 -20px 50px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --timeline-track-bg: rgba(0, 0, 0, 0.06);
+
+  --shadow-dock: 0 12px 36px -4px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-sheet: 0 -20px 50px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 /* --------------------------------------------------------------------------
@@ -137,11 +147,13 @@
    -------------------------------------------------------------------------- */
 [data-theme="cyberpunk"] {
   --bg-void: #090514;
+  --app-bg: rgba(9, 5, 20, 0.92);
   --bg-surface: #120A27;
   --bg-surface-elevated: #1B103B;
   --bg-surface-hover: #261652;
   --bg-surface-active: #321D6B;
   --bg-translucent: rgba(18, 10, 39, 0.88);
+  --bg-dock: rgba(27, 16, 59, 0.94);
 
   --border-subtle: rgba(217, 70, 239, 0.16);
   --border-medium: rgba(217, 70, 239, 0.3);
@@ -152,6 +164,7 @@
   --accent-mint: #06B6D4;
   --accent-mint-dim: rgba(6, 182, 212, 0.16);
   --accent-mint-glow: rgba(6, 182, 212, 0.38);
+  --accent-mint-contrast: #08090C;
   --accent-emerald: #10B981;
 
   --urgency-critical: #F43F5E;
@@ -180,6 +193,8 @@
   --text-primary: #FDF4FF;
   --text-secondary: #D8B4FE;
   --text-muted: #A855F7;
+
+  --timeline-track-bg: rgba(217, 70, 239, 0.15);
 
   --shadow-dock: 0 16px 40px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(217, 70, 239, 0.3);
   --shadow-sheet: 0 -20px 50px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(217, 70, 239, 0.3);
@@ -271,7 +286,7 @@ body {
   position: relative;
   z-index: 1;
   padding-bottom: calc(96px + var(--bottom-safe));
-  background-color: rgba(8, 9, 12, 0.7);
+  background-color: var(--app-bg);
   border-left: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
 }
@@ -283,8 +298,12 @@ body {
     min-height: calc(100vh - 48px);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-subtle);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), var(--hardware-light);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), var(--hardware-light);
   }
+}
+
+[data-theme="light"] .app-container {
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.08);
 }
 
 .visually-hidden {
@@ -1042,7 +1061,7 @@ body {
 .timeline-hairline-track {
   width: 100%;
   height: 3px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--timeline-track-bg, rgba(255, 255, 255, 0.05));
   border-radius: var(--radius-pill);
   overflow: hidden;
   position: relative;
@@ -1079,8 +1098,8 @@ body {
   flex-shrink: 0;
 }
 
-.urgency-badge-subtle.critico { color: #FFA19B; }
-.urgency-badge-subtle.atencao { color: #FFC366; }
+.urgency-badge-subtle.critico { color: var(--urgency-critical); }
+.urgency-badge-subtle.atencao { color: var(--urgency-warning); }
 .urgency-badge-subtle.seguro { color: var(--accent-mint); }
 .urgency-badge-subtle.expirado { color: var(--text-muted); }
 
@@ -1194,7 +1213,7 @@ body {
 
 .thumb-dock {
   pointer-events: auto;
-  background: rgba(21, 24, 33, 0.92);
+  background: var(--bg-dock, rgba(21, 24, 33, 0.92));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-medium);
@@ -1231,7 +1250,7 @@ body {
 }
 
 .dock-camera-trigger:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-surface-hover);
   color: var(--text-pure);
 }
 
@@ -1243,7 +1262,7 @@ body {
 
 .dock-main-add {
   background: var(--accent-mint);
-  color: #08090C;
+  color: var(--accent-mint-contrast, #08090C);
   box-shadow: 0 4px 16px var(--accent-mint-glow);
 }
 
@@ -2632,4 +2651,133 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   16. CALIBRAÇÕES ESPECÍFICAS DE TEMA (LIGHT & CYBERPUNK)
+   -------------------------------------------------------------------------- */
+[data-theme="light"] body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .ambient-mesh .mesh-blob.blob-1 {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.09) 0%, rgba(16, 185, 129, 0) 70%);
+}
+
+[data-theme="light"] .ambient-mesh .mesh-blob.blob-2 {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, rgba(14, 165, 233, 0) 70%);
+}
+
+[data-theme="light"] .ambient-mesh .mesh-grain {
+  opacity: 0.012;
+}
+
+/* Barra de Filtros Segmentada no Tema Claro */
+[data-theme="light"] .filter-pill-nav {
+  background: #E5E9F0;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .filter-tab {
+  color: #475569;
+}
+
+[data-theme="light"] .filter-tab:hover {
+  color: #0F172A;
+}
+
+[data-theme="light"] .filter-tab.active {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #0F172A;
+}
+
+[data-theme="light"] .filter-tab.active .tab-badge {
+  color: #0F172A;
+}
+
+/* Badge do Radar no Tema Claro */
+[data-theme="light"] .radar-counter {
+  background: #E2E8F0;
+  color: #334155;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Tickets de Urgência no Tema Claro */
+[data-theme="light"] .pass-ticket-card {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .pass-ticket-card:hover {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+/* Card Principal Cockpit no Tema Claro */
+[data-theme="light"] .vault-hero-card {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .vault-hero-card::after {
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, transparent 70%);
+}
+
+/* Cards da Lista no Tema Claro */
+[data-theme="light"] .inventory-row-card {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .inventory-row-card:hover {
+  background: #F8FAFC;
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+/* Botões de Ação na Lista */
+[data-theme="light"] .action-btn-pill {
+  background: #F1F4F8;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #475569;
+}
+
+[data-theme="light"] .action-btn-pill:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+/* Botão de Adicionar / Salvar no Tema Claro */
+[data-theme="light"] .btn-vault-action,
+[data-theme="light"] .dock-main-add {
+  background: #059669;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+}
+
+[data-theme="light"] .btn-vault-action:hover,
+[data-theme="light"] .dock-main-add:hover {
+  background: #047857;
+}
+
+/* Thumb Dock no Tema Claro */
+[data-theme="light"] .thumb-dock {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .dock-camera-trigger {
+  color: #475569;
+}
+
+[data-theme="light"] .dock-camera-trigger:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0F172A;
 }
