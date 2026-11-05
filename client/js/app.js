@@ -33,7 +33,8 @@ import {
 
 import {
   loginWithGoogle,
-  checkOAuthCallback
+  checkOAuthCallback,
+  deleteAccountApi
 } from './supabase.js';
 
 import {
@@ -402,7 +403,7 @@ function toggleDrawer() {
 function renderAvatarElement(el, avatarVal) {
   if (!el) return;
   if (avatarVal && (avatarVal.startsWith('http') || avatarVal.startsWith('data:'))) {
-    el.innerHTML = `<img src="${avatarVal}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+    el.innerHTML = `<img src="${avatarVal}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50% !important; display: block;">`;
   } else {
     el.textContent = avatarVal || 'BC';
   }
@@ -436,18 +437,18 @@ function populateProfileForm() {
 
   // Campos do Formulário
   const inputName = document.getElementById('input-profile-name');
-  const inputEmail = document.getElementById('input-profile-email');
   if (inputName) inputName.value = p.name || '';
-  if (inputEmail) inputEmail.value = p.email || '';
 }
 
 function handleSaveProfile(e) {
   e.preventDefault();
-  const name = document.getElementById('input-profile-name')?.value.trim() || 'Usuário Gavet';
-  const email = document.getElementById('input-profile-email')?.value.trim() || 'usuario@gavet.app';
+  const name = document.getElementById('input-profile-name')?.value.trim();
+  if (!name) {
+    showToast('Informe seu nome ou apelido.', 'warning');
+    return;
+  }
 
   appState.profile.name = name;
-  appState.profile.email = email;
 
   // Se avatar for iniciais textuais, recalcula
   if (!appState.profile.avatar || appState.profile.avatar.length <= 2) {
@@ -796,6 +797,91 @@ function updateAuthUI() {
   if (btnLogoutProfile) {
     btnLogoutProfile.style.display = isLoggedIn ? 'flex' : 'none';
   }
+
+  const btnDeleteAccount = document.getElementById('btn-delete-account');
+  if (btnDeleteAccount) {
+    btnDeleteAccount.style.display = isLoggedIn ? 'flex' : 'none';
+  }
+}
+
+/**
+ * Abre o modal de confirmação para deletar a conta
+ */
+function openDeleteAccountModal() {
+  const modal = document.getElementById('modal-delete-account');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+}
+
+/**
+ * Fecha o modal de confirmação para deletar a conta
+ */
+function closeDeleteAccountModal() {
+  const modal = document.getElementById('modal-delete-account');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+/**
+ * Executa a exclusão permanente da conta e dados
+ */
+async function handleConfirmDeleteAccount() {
+  const btnConfirm = document.getElementById('btn-confirm-delete-account');
+  const btnCancel = document.getElementById('btn-cancel-delete-account');
+  const originalText = btnConfirm ? btnConfirm.innerHTML : '';
+
+  try {
+    if (btnConfirm) {
+      btnConfirm.disabled = true;
+      btnConfirm.innerHTML = `<span class="btn-spinner" style="width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;"></span> Excluindo...`;
+    }
+    if (btnCancel) btnCancel.disabled = true;
+
+    // 1. Tenta excluir no Supabase / backend
+    try {
+      await deleteAccountApi();
+    } catch (apiErr) {
+      console.warn('Erro ao excluir no backend/Supabase, prosseguindo com limpeza local:', apiErr);
+    }
+
+    // 2. Limpa banco de dados local (IndexedDB)
+    await clearAllDocuments();
+
+    // 3. Remove tokens e chaves do armazenamento local
+    localStorage.removeItem('gavet_token');
+    localStorage.removeItem('gavet_user');
+    localStorage.removeItem('gavet_profile');
+
+    // 4. Reseta estado da aplicação
+    appState.auth = { token: null, user: null };
+    appState.profile = getDefaultProfile();
+    appState.documents = [];
+
+    // 5. Atualiza dashboard e perfil
+    await renderDashboard();
+    populateProfileForm();
+    updateAuthUI();
+
+    // 6. Fecha o modal de confirmação
+    closeDeleteAccountModal();
+
+    // 7. Feedback de sucesso e reabre a tela de autenticação
+    showToast('Sua conta e registros foram excluídos permanentemente.', 'success');
+    openAuthModal('login');
+  } catch (error) {
+    console.error('Falha ao excluir conta:', error);
+    showToast(error.message || 'Erro ao excluir conta. Tente novamente.', 'error');
+  } finally {
+    if (btnConfirm) {
+      btnConfirm.disabled = false;
+      btnConfirm.innerHTML = originalText;
+    }
+    if (btnCancel) btnCancel.disabled = false;
+  }
 }
 
 /**
@@ -1077,6 +1163,29 @@ function setupEventListeners() {
     btnLogoutProfile.addEventListener('click', handleLogout);
   }
 
+  // Ações de Exclusão de Conta
+  const btnDeleteAccount = document.getElementById('btn-delete-account');
+  const btnCancelDeleteAccount = document.getElementById('btn-cancel-delete-account');
+  const btnConfirmDeleteAccount = document.getElementById('btn-confirm-delete-account');
+  const modalDeleteAccount = document.getElementById('modal-delete-account');
+
+  if (btnDeleteAccount) {
+    btnDeleteAccount.addEventListener('click', openDeleteAccountModal);
+  }
+  if (btnCancelDeleteAccount) {
+    btnCancelDeleteAccount.addEventListener('click', closeDeleteAccountModal);
+  }
+  if (btnConfirmDeleteAccount) {
+    btnConfirmDeleteAccount.addEventListener('click', handleConfirmDeleteAccount);
+  }
+  if (modalDeleteAccount) {
+    modalDeleteAccount.addEventListener('click', (e) => {
+      if (e.target === modalDeleteAccount) {
+        closeDeleteAccountModal();
+      }
+    });
+  }
+
   // Auth Screen / Modal Controls
   const authScreen = document.getElementById('auth-screen');
   const btnCloseAuth = document.getElementById('btn-close-auth');
@@ -1179,6 +1288,7 @@ function setupEventListeners() {
     if (e.key === 'Escape') {
       closeModal();
       closeDrawer();
+      closeDeleteAccountModal();
       if (appState.auth && appState.auth.token) {
         closeAuthModal();
       }

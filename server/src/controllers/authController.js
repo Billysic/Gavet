@@ -9,7 +9,8 @@ import {
   isSupabaseConfigured,
   supabaseRegister,
   supabaseLogin,
-  supabaseGetMe
+  supabaseGetMe,
+  supabaseDeleteUser
 } from '../config/supabase.js';
 
 /**
@@ -158,5 +159,50 @@ export async function getMe(req, res) {
   } catch (error) {
     console.error('Erro em getMe:', error);
     return res.status(500).json({ error: 'Falha ao verificar dados da sessão.' });
+  }
+}
+
+/**
+ * Exclui a conta do usuário e limpa seus registros associados
+ * DELETE /api/auth/account
+ */
+export async function deleteAccount(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: 'Nenhum token fornecido para exclusão.' });
+    }
+
+    const token = authHeader.replace(/^Bearer\s+/i, '');
+
+    // Se Supabase estiver ativo
+    if (isSupabaseConfigured()) {
+      try {
+        await supabaseDeleteUser(token);
+        return res.status(200).json({
+          success: true,
+          message: 'Sua conta e registros foram excluídos permanentemente do Supabase.'
+        });
+      } catch (sbErr) {
+        console.warn('Erro ao excluir no Supabase:', sbErr.message);
+        return res.status(400).json({ error: sbErr.message || 'Falha ao excluir conta no Supabase.' });
+      }
+    }
+
+    // Modo SQLite
+    const match = token.match(/^gavet_(user_\d+_[a-f0-9]+)_/);
+    if (match && match[1]) {
+      const db = await (await import('../config/database.js')).getDatabase();
+      db.prepare('DELETE FROM users WHERE id = $id').run({ $id: match[1] });
+      return res.status(200).json({
+        success: true,
+        message: 'Conta excluída com sucesso do sistema local.'
+      });
+    }
+
+    return res.status(401).json({ error: 'Sessão inválida para exclusão de conta.' });
+  } catch (error) {
+    console.error('Erro ao excluir conta:', error);
+    return res.status(500).json({ error: error.message || 'Erro interno ao excluir conta.' });
   }
 }

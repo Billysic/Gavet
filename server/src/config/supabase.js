@@ -293,3 +293,24 @@ export async function supabaseGetMe(token) {
     created_at: user.created_at
   };
 }
+
+/**
+ * Remove permanentemente a conta de um usuário no Supabase Auth e em cascata nas tabelas
+ */
+export async function supabaseDeleteUser(token) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Supabase não configurado');
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  if (userError || !user) {
+    throw new Error('Sessão expirada ou usuário não autenticado.');
+  }
+
+  const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
+  if (deleteError) {
+    console.error('Erro ao excluir usuário no Supabase:', deleteError);
+    throw new Error(deleteError.message || 'Falha ao deletar usuário no Supabase.');
+  }
+
+  return { success: true, userId: user.id };
+}

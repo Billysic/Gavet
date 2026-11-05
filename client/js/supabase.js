@@ -87,3 +87,35 @@ export async function checkOAuthCallback() {
     return null;
   }
 }
+
+/**
+ * Exclui a conta do usuário atual no backend (Supabase Service Role) e encerra a sessão
+ */
+export async function deleteAccountApi() {
+  const token = localStorage.getItem('gavet_token');
+  if (!token) {
+    throw new Error('Nenhuma sessão ativa encontrada para exclusão.');
+  }
+
+  const res = await fetch('/api/auth/account', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.error || 'Falha ao excluir a conta.');
+  }
+
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.warn('[Supabase] Erro ao encerrar sessão local após exclusão:', err);
+  }
+
+  return data;
+}
