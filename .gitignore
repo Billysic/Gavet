@@ -11,6 +11,10 @@ server/uploads/*
 # Banco SQLite local
 server/*.db
 server/*.db-journal
+server/*.sqlite
+server/*.sqlite-journal
+*.sqlite
+*.sqlite-journal
 
 # Variáveis de ambiente
 .env

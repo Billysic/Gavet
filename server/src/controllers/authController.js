@@ -1,9 +1,12 @@
-import crypto from 'node:crypto';
 import {
   createUser,
   findUserByEmail,
   verifyUserPassword,
-  findUserById
+  findUserById,
+  createSession,
+  findUserBySessionToken,
+  deleteSession,
+  deleteUserAccount
 } from '../config/database.js';
 import {
   isSupabaseConfigured,
@@ -63,7 +66,7 @@ export async function register(req, res) {
       password
     });
 
-    const token = `gavet_${user.id}_${crypto.randomBytes(16).toString('hex')}`;
+    const token = await createSession(user.id);
 
     return res.status(201).json({
       success: true,
@@ -112,7 +115,7 @@ export async function login(req, res) {
       return res.status(401).json({ error: 'E-mail ou senha incorretos. Verifique suas credenciais.' });
     }
 
-    const token = `gavet_${user.id}_${crypto.randomBytes(16).toString('hex')}`;
+    const token = await createSession(user.id);
 
     return res.status(200).json({
       success: true,
@@ -138,21 +141,20 @@ export async function getMe(req, res) {
       return res.status(401).json({ error: 'Nenhum token fornecido.' });
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, '');
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
     if (isSupabaseConfigured()) {
       const user = await supabaseGetMe(token);
       if (user) {
         return res.status(200).json({ success: true, user, provider: 'supabase' });
       }
+      return res.status(401).json({ error: 'Sessão Supabase inválida ou expirada.' });
     }
 
-    const match = token.match(/^gavet_(user_\d+_[a-f0-9]+)_/);
-    if (match && match[1]) {
-      const user = await findUserById(match[1]);
-      if (user) {
-        return res.status(200).json({ success: true, user, provider: 'sqlite' });
-      }
+    // Modo SQLite: Validação estrita por correspondência de sessão no banco
+    const user = await findUserBySessionToken(token);
+    if (user) {
+      return res.status(200).json({ success: true, user, provider: 'sqlite' });
     }
 
     return res.status(401).json({ error: 'Sessão expirada ou inválida.' });
@@ -173,7 +175,7 @@ export async function deleteAccount(req, res) {
       return res.status(401).json({ error: 'Nenhum token fornecido para exclusão.' });
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, '');
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
     // Se Supabase estiver ativo
     if (isSupabaseConfigured()) {
@@ -189,18 +191,17 @@ export async function deleteAccount(req, res) {
       }
     }
 
-    // Modo SQLite
-    const match = token.match(/^gavet_(user_\d+_[a-f0-9]+)_/);
-    if (match && match[1]) {
-      const db = await (await import('../config/database.js')).getDatabase();
-      db.prepare('DELETE FROM users WHERE id = $id').run({ $id: match[1] });
-      return res.status(200).json({
-        success: true,
-        message: 'Conta excluída com sucesso do sistema local.'
-      });
+    // Modo SQLite: Valida token na tabela de sessões e exclui dados vinculados
+    const user = await findUserBySessionToken(token);
+    if (!user) {
+      return res.status(401).json({ error: 'Sessão inválida para exclusão de conta.' });
     }
 
-    return res.status(401).json({ error: 'Sessão inválida para exclusão de conta.' });
+    await deleteUserAccount(user.id);
+    return res.status(200).json({
+      success: true,
+      message: 'Conta e registros excluídos com sucesso do sistema local.'
+    });
   } catch (error) {
     console.error('Erro ao excluir conta:', error);
     return res.status(500).json({ error: error.message || 'Erro interno ao excluir conta.' });

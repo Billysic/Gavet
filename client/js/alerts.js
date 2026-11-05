@@ -28,14 +28,16 @@ export function calculateDocumentExpiration(doc) {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  const meses = parseInt(doc.meses_garantia, 10) || 12;
+  const meses = Math.max(1, parseInt(doc.meses_garantia, 10) || 1);
   let dataVenc = new Date(dataCompra);
 
   if (doc.tipo_documento === 'assinatura') {
-    // Para assinaturas: projeta os próximos ciclos (mensal, anual, etc) até encontrar uma data futura
+    // Para assinaturas: projeta os próximos ciclos futuros com teto defensivo contra loop infinito
+    let safetyCounter = 0;
     dataVenc.setMonth(dataVenc.getMonth() + meses);
-    while (dataVenc < hoje) {
+    while (dataVenc < hoje && safetyCounter < 120) {
       dataVenc.setMonth(dataVenc.getMonth() + meses);
+      safetyCounter++;
     }
   } else {
     // Para garantias e notas fiscais: data_compra + prazo em meses

@@ -6,8 +6,7 @@
 
 /**
  * Envia imagem (cupom/foto) ou PDF para o backend com Gemini 2.5 Flash OCR.
- * Se o backend não estiver respondendo (ex: teste estático do front-end),
- * aciona uma simulação inteligente com dados realistas para não travar a UX.
+ * Comunica-se com o backend real, enviando token de autorização.
  * 
  * @param {File} file - Arquivo de imagem ou PDF
  * @returns {Promise<{ loja: string, valor: number, data_compra: string, meses_garantia: number, tipo_documento: string }>}
@@ -16,12 +15,19 @@ export async function sendFileToGemini(file) {
   const formData = new FormData();
   formData.append('file', file);
 
+  const token = localStorage.getItem('gavet_token');
+  const headers = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
     const response = await fetch('/api/documents/analyze', {
       method: 'POST',
+      headers,
       body: formData,
       signal: controller.signal
     });
@@ -29,56 +35,30 @@ export async function sendFileToGemini(file) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`Servidor retornou status ${response.status}`);
+      const errData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        throw new Error('Você precisa estar logado para analisar comprovantes com a IA.');
+      }
+      if (response.status === 429) {
+        throw new Error('Muitas análises em pouco tempo. Aguarde 1 minuto antes de enviar novamente.');
+      }
+      throw new Error(errData.error || `Servidor retornou status ${response.status}`);
     }
 
     const data = await response.json();
     return data.data || data;
   } catch (error) {
-    console.warn('API /api/documents/analyze indisponível ou em modo offline. Usando fallback de simulação Gemini:', error.message);
-    
-    // Simulação visual de latência de IA (1.6 segundos)
-    await new Promise(r => setTimeout(r, 1600));
-
-    // Exemplos dinâmicos para demonstração offline
-    const mockPresets = [
-      {
-        loja: 'Apple Brasil (Store Morumbi)',
-        valor: 7499.00,
-        data_compra: new Date().toISOString().split('T')[0],
-        meses_garantia: 12,
-        tipo_documento: 'garantia'
-      },
-      {
-        loja: 'Amazon Prime Video & Retail',
-        valor: 19.90,
-        data_compra: new Date().toISOString().split('T')[0],
-        meses_garantia: 1,
-        tipo_documento: 'assinatura'
-      },
-      {
-        loja: 'Dell Computadores do Brasil',
-        valor: 4289.50,
-        data_compra: new Date(Date.now() - 330 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        meses_garantia: 12,
-        tipo_documento: 'garantia'
-      },
-      {
-        loja: 'Fast Shop S.A.',
-        valor: 2199.90,
-        data_compra: new Date().toISOString().split('T')[0],
-        meses_garantia: 24,
-        tipo_documento: 'garantia'
-      }
-    ];
-
-    const randomMock = mockPresets[Math.floor(Math.random() * mockPresets.length)];
-    return randomMock;
+    console.error('[OCR Service Error]:', error);
+    throw new Error(
+      error.name === 'AbortError'
+        ? 'O envio do arquivo excedeu o tempo limite. Tente novamente com um arquivo menor.'
+        : (error.message || 'Não foi possível analisar o comprovante com a IA. Preencha os campos manualmente.')
+    );
   }
 }
 
 /**
- * Envia lote de documentos locais para persistência no SQLite do servidor.
+ * Envia lote de documentos locais para persistência no servidor (isolado por usuário).
  * 
  * @param {Array} documents - Lista de Documentos
  * @returns {Promise<{ success: boolean, count: number }>}
@@ -88,12 +68,20 @@ export async function syncWithServer(documents = []) {
     return { success: false, count: 0, reason: 'offline' };
   }
 
+  const token = localStorage.getItem('gavet_token');
+  if (!token) {
+    return { success: false, count: 0, reason: 'unauthenticated' };
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+
   try {
     const response = await fetch('/api/documents/sync', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify({ documents })
     });
 

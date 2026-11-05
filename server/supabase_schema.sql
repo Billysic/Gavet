@@ -54,32 +54,59 @@ CREATE TRIGGER trigger_documents_updated_at
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 
--- Políticas de acesso público/autenticado para profiles
-CREATE POLICY "Permitir leitura de perfis" 
+-- Políticas de acesso seguro para profiles (restritas ao próprio usuário autenticado)
+DROP POLICY IF EXISTS "Permitir leitura de perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Permitir inserção e atualização de perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Leitura de perfil do proprietario" ON public.profiles;
+DROP POLICY IF EXISTS "Insercao de perfil do proprietario" ON public.profiles;
+DROP POLICY IF EXISTS "Atualizacao de perfil do proprietario" ON public.profiles;
+
+CREATE POLICY "Leitura de perfil do proprietario" 
   ON public.profiles FOR SELECT 
-  USING (true);
+  TO authenticated 
+  USING (auth.uid() = id);
 
-CREATE POLICY "Permitir inserção e atualização de perfis" 
-  ON public.profiles FOR ALL 
-  USING (true)
-  WITH CHECK (true);
+CREATE POLICY "Insercao de perfil do proprietario" 
+  ON public.profiles FOR INSERT 
+  TO authenticated 
+  WITH CHECK (auth.uid() = id);
 
--- Políticas de acesso público/autenticado para documents
-CREATE POLICY "Permitir leitura de documentos" 
+CREATE POLICY "Atualizacao de perfil do proprietario" 
+  ON public.profiles FOR UPDATE 
+  TO authenticated 
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Políticas de acesso seguro para documents (isolamento estrito de tenant por user_id)
+DROP POLICY IF EXISTS "Permitir leitura de documentos" ON public.documents;
+DROP POLICY IF EXISTS "Permitir inserção de documentos" ON public.documents;
+DROP POLICY IF EXISTS "Permitir atualização de documentos" ON public.documents;
+DROP POLICY IF EXISTS "Permitir exclusão de documentos" ON public.documents;
+DROP POLICY IF EXISTS "Leitura de documentos do proprietario" ON public.documents;
+DROP POLICY IF EXISTS "Insercao de documentos do proprietario" ON public.documents;
+DROP POLICY IF EXISTS "Atualizacao de documentos do proprietario" ON public.documents;
+DROP POLICY IF EXISTS "Exclusao de documentos do proprietario" ON public.documents;
+
+CREATE POLICY "Leitura de documentos do proprietario" 
   ON public.documents FOR SELECT 
-  USING (true);
+  TO authenticated 
+  USING (auth.uid() = user_id);
 
-CREATE POLICY "Permitir inserção de documentos" 
+CREATE POLICY "Insercao de documentos do proprietario" 
   ON public.documents FOR INSERT 
-  WITH CHECK (true);
+  TO authenticated 
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Permitir atualização de documentos" 
+CREATE POLICY "Atualizacao de documentos do proprietario" 
   ON public.documents FOR UPDATE 
-  USING (true);
+  TO authenticated 
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Permitir exclusão de documentos" 
+CREATE POLICY "Exclusao de documentos do proprietario" 
   ON public.documents FOR DELETE 
-  USING (true);
+  TO authenticated 
+  USING (auth.uid() = user_id);
 
 -- 6. Gatilho automático ao criar usuário pelo Supabase Auth
 CREATE OR REPLACE FUNCTION public.handle_new_user()

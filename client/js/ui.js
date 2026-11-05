@@ -7,6 +7,22 @@
 import { calculateDocumentExpiration, calculateFinancialMetrics } from './alerts.js';
 
 /**
+ * Sanitiza texto para evitar Stored XSS em inserções no DOM
+ * @param {string} str
+ * @returns {string}
+ */
+export function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
+
+/**
  * Retorna o ícone SVG vetorial correspondente ao tipo de documento.
  * @param {string} tipo
  * @param {number} size
@@ -266,12 +282,14 @@ export function renderUrgencyRadar(urgentItems = [], onEdit) {
 
   container.innerHTML = urgentItems.map(item => {
     const urgencyClass = item.nivelUrgencia || 'seguro';
+    const safeLoja = escapeHTML(item.loja);
+    const safeUrgencia = escapeHTML(item.labelUrgencia);
 
     return `
-      <article class="pass-ticket-card ${urgencyClass}" data-id="${item.id}" tabindex="0" role="button" aria-label="${item.loja}, ${item.labelUrgencia}">
+      <article class="pass-ticket-card ${urgencyClass}" data-id="${item.id}" tabindex="0" role="button" aria-label="${safeLoja}, ${safeUrgencia}">
         <div class="ticket-header">
-          <h3 class="ticket-store-name" title="${item.loja}">${item.loja}</h3>
-          <span class="ticket-countdown-pill">${item.labelUrgencia}</span>
+          <h3 class="ticket-store-name" title="${safeLoja}">${safeLoja}</h3>
+          <span class="ticket-countdown-pill">${safeUrgencia}</span>
         </div>
         
         <div class="ticket-footer">
@@ -335,6 +353,9 @@ export function renderDocumentsList(documents = [], filter = 'todos', onDelete, 
     if (item.tipo_documento === 'assinatura') typeDisplayName = 'Assinatura';
     if (item.tipo_documento === 'nota_fiscal') typeDisplayName = 'Nota Fiscal';
 
+    const safeLoja = escapeHTML(item.loja);
+    const safeUrgencia = escapeHTML(item.labelUrgencia);
+
     return `
       <div class="inventory-row-card" data-id="${item.id}" role="listitem">
         <div class="inventory-row-main">
@@ -343,7 +364,7 @@ export function renderDocumentsList(documents = [], filter = 'todos', onDelete, 
               ${getTypeIconSvg(item.tipo_documento, 18)}
             </div>
             <div class="inventory-meta">
-              <h3 class="inventory-store">${item.loja}</h3>
+              <h3 class="inventory-store">${safeLoja}</h3>
               <div class="inventory-subline">
                 <span class="kind-tag kind-${item.tipo_documento}">${typeDisplayName}</span>
                 <span>•</span>
@@ -367,18 +388,18 @@ export function renderDocumentsList(documents = [], filter = 'todos', onDelete, 
         <div class="inventory-row-bottom">
           <span class="urgency-badge-subtle ${urgencyClass}">
             ${getUrgencyIconSvg(urgencyClass, 13)}
-            <span>${item.labelUrgencia}</span>
+            <span>${safeUrgencia}</span>
             <span style="color:var(--text-muted); font-weight:400;">(${formatDate(item.dataVencimento)})</span>
           </span>
 
           <div class="inventory-action-group">
-            <button type="button" class="action-btn-pill action-btn-edit" data-id="${item.id}" aria-label="Editar ${item.loja}">
+            <button type="button" class="action-btn-pill action-btn-edit" data-id="${item.id}" aria-label="Editar ${safeLoja}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
             </button>
-            <button type="button" class="action-btn-pill action-btn-delete" data-id="${item.id}" aria-label="Excluir ${item.loja}">
+            <button type="button" class="action-btn-pill action-btn-delete" data-id="${item.id}" aria-label="Excluir ${safeLoja}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>

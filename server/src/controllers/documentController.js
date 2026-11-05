@@ -57,11 +57,12 @@ export async function analyzeDocument(req, res) {
 }
 
 /**
- * Sincroniza lista de documentos do IndexedDB para o banco SQLite do servidor
+ * Sincroniza lista de documentos do IndexedDB para o banco SQLite/Supabase do servidor
  */
 export async function syncDocuments(req, res) {
   try {
     const { documents } = req.body;
+    const userId = req.user.id;
 
     if (!Array.isArray(documents)) {
       return res.status(400).json({
@@ -71,8 +72,8 @@ export async function syncDocuments(req, res) {
     }
 
     const updatedList = isSupabaseConfigured()
-      ? await supabaseSyncBatch(documents)
-      : await syncBatchDocuments(documents);
+      ? await supabaseSyncBatch(documents, userId)
+      : await syncBatchDocuments(documents, userId);
 
     return res.status(200).json({
       success: true,
@@ -92,13 +93,14 @@ export async function syncDocuments(req, res) {
 }
 
 /**
- * Retorna todos os documentos persistidos no servidor
+ * Retorna todos os documentos persistidos no servidor para o usuário logado
  */
 export async function listDocuments(req, res) {
   try {
+    const userId = req.user.id;
     const documents = isSupabaseConfigured()
-      ? await supabaseGetAllDocuments()
-      : await getAllDocuments();
+      ? await supabaseGetAllDocuments(userId)
+      : await getAllDocuments(userId);
 
     return res.status(200).json({
       success: true,
@@ -115,15 +117,16 @@ export async function listDocuments(req, res) {
 }
 
 /**
- * Remove um documento pelo ID
+ * Remove um documento pertencente ao usuário pelo ID
  */
 export async function removeDocument(req, res) {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
     if (isSupabaseConfigured()) {
-      await supabaseDeleteDocument(id);
+      await supabaseDeleteDocument(id, userId);
     } else {
-      await deleteDocumentById(id);
+      await deleteDocumentById(id, userId);
     }
     return res.status(200).json({
       success: true,

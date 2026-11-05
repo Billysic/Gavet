@@ -1385,7 +1385,7 @@ async function handleAiFileUpload(file) {
     showToast(`Comprovante lido com sucesso (${extracted.loja})`, 'success');
   } catch (error) {
     console.error('Erro no OCR:', error);
-    showToast('Falha na leitura automática. Insira manualmente.', 'warning');
+    showToast(error.message || 'Falha na leitura automática. Insira manualmente.', 'warning');
   } finally {
     setAiLoadingState(false);
   }

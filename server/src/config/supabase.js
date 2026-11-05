@@ -59,14 +59,20 @@ export function getSupabase() {
 // OPERAÇÕES DE DOCUMENTOS COM SUPABASE
 // ==========================================
 
-export async function supabaseGetAllDocuments() {
+export async function supabaseGetAllDocuments(userId) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Supabase não configurado');
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('documents')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao buscar documentos no Supabase:', error);
@@ -85,13 +91,14 @@ export async function supabaseGetAllDocuments() {
   }));
 }
 
-export async function supabaseUpsertDocument(doc) {
+export async function supabaseUpsertDocument(doc, userId) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Supabase não configurado');
 
   const now = new Date().toISOString();
   const payload = {
     id: doc.id || `doc_${Date.now()}`,
+    user_id: userId || doc.user_id,
     loja: doc.loja || 'Desconhecido',
     valor: Number(doc.valor) || 0,
     data_compra: doc.data_compra || now.split('T')[0],
@@ -114,14 +121,16 @@ export async function supabaseUpsertDocument(doc) {
   return data;
 }
 
-export async function supabaseDeleteDocument(id) {
+export async function supabaseDeleteDocument(id, userId) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Supabase não configurado');
 
-  const { error } = await supabase
-    .from('documents')
-    .delete()
-    .eq('id', id);
+  let query = supabase.from('documents').delete().eq('id', id);
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { error } = await query;
 
   if (error) {
     console.error('Erro ao deletar documento no Supabase:', error);
@@ -131,13 +140,14 @@ export async function supabaseDeleteDocument(id) {
   return { success: true, id };
 }
 
-export async function supabaseSyncBatch(documents = []) {
+export async function supabaseSyncBatch(documents = [], userId) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Supabase não configurado');
 
   const now = new Date().toISOString();
   const payload = documents.map(doc => ({
     id: doc.id || `doc_${Date.now()}`,
+    user_id: userId || doc.user_id,
     loja: doc.loja || 'Desconhecido',
     valor: Number(doc.valor) || 0,
     data_compra: doc.data_compra || now.split('T')[0],
@@ -157,7 +167,7 @@ export async function supabaseSyncBatch(documents = []) {
     }
   }
 
-  return supabaseGetAllDocuments();
+  return supabaseGetAllDocuments(userId);
 }
 
 // ==========================================
