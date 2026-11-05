@@ -277,6 +277,11 @@ function switchView(viewName) {
     item.classList.toggle('active', item.dataset.navigate === target);
   });
 
+  const drawerUserCard = document.getElementById('drawer-user-trigger');
+  if (drawerUserCard) {
+    drawerUserCard.classList.toggle('active', target === 'profile');
+  }
+
   closeDrawer();
 
   if (target === 'profile') {

@@ -1993,6 +1993,11 @@ body {
   border-color: var(--border-medium);
 }
 
+.drawer-user-card.active {
+  border-color: var(--accent-mint);
+  box-shadow: 0 0 16px var(--accent-mint-dim);
+}
+
 .drawer-avatar {
   width: 40px;
   height: 40px;
