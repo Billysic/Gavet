@@ -57,8 +57,7 @@ function getStoredProfile() {
   return {
     name: 'Usuário Gavet',
     email: 'usuario@gavet.app',
-    avatar: 'BC',
-    apiKey: ''
+    avatar: 'BC'
   };
 }
 
@@ -369,21 +368,17 @@ function populateProfileForm() {
   // Campos do Formulário
   const inputName = document.getElementById('input-profile-name');
   const inputEmail = document.getElementById('input-profile-email');
-  const inputApiKey = document.getElementById('input-profile-gemini-key');
   if (inputName) inputName.value = p.name || '';
   if (inputEmail) inputEmail.value = p.email || '';
-  if (inputApiKey) inputApiKey.value = p.apiKey || '';
 }
 
 function handleSaveProfile(e) {
   e.preventDefault();
   const name = document.getElementById('input-profile-name')?.value.trim() || 'Usuário Gavet';
   const email = document.getElementById('input-profile-email')?.value.trim() || 'usuario@gavet.app';
-  const apiKey = document.getElementById('input-profile-gemini-key')?.value.trim() || '';
 
   appState.profile.name = name;
   appState.profile.email = email;
-  appState.profile.apiKey = apiKey;
 
   // Se avatar for iniciais textuais, recalcula
   if (!appState.profile.avatar || appState.profile.avatar.length <= 2) {
