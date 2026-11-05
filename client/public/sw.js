@@ -3,7 +3,7 @@
  * Estratégia Offline-First: Cache-First para recursos estáticos e Network-First para APIs.
  */
 
-const CACHE_NAME = 'gavet-cache-v2';
+const CACHE_NAME = 'gavet-cache-v3';
 
 // Recursos críticos para carregar o app 100% offline
 const STATIC_ASSETS = [

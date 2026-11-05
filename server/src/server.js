@@ -44,13 +44,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Suporte a Produção / Render: Serve os arquivos estáticos do front-end construído (client/dist)
+// Suporte a Produção / Render: Serve os arquivos estáticos do front-end construído (client/dist) com caching inteligente
 const clientDistPath = path.join(__dirname, '../../client/dist');
 if (fs.existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
+  app.use(express.static(clientDistPath, {
+    maxAge: '1h',
+    setHeaders: (res, filePath) => {
+      const normalizedPath = filePath.replace(/\\/g, '/');
+      if (normalizedPath.includes('/assets/')) {
+        // Arquivos versionados com hash (CSS/JS minificados): cache imutável de 1 ano
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (normalizedPath.endsWith('sw.js') || normalizedPath.endsWith('index.html')) {
+        // Service worker e index.html: sempre revalidados para receber novas versões instantaneamente
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+    }
+  }));
 
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     res.sendFile(path.join(clientDistPath, 'index.html'));
   });
 }

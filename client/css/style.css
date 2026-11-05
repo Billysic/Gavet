@@ -291,6 +291,9 @@ body {
   filter: blur(100px);
   border-radius: 50%;
   opacity: 0.15;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .blob-1 {
@@ -1025,6 +1028,8 @@ body {
   flex-direction: column;
   gap: 10px;
   transition: all 0.2s var(--spring-easing);
+  content-visibility: auto;
+  contain-intrinsic-size: 0 92px;
 }
 
 .inventory-row-card:hover {
@@ -1298,6 +1303,8 @@ body {
   align-items: center;
   gap: 6px;
   transition: transform 0.2s var(--spring-easing);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .thumb-dock:hover {
@@ -1395,6 +1402,8 @@ body {
   overflow-y: auto;
   transform: translateY(100%);
   transition: transform 0.3s var(--spring-easing);
+  will-change: transform;
+  backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1955,6 +1964,8 @@ body {
   align-items: center;
   gap: 10px;
   pointer-events: auto;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
   animation: toast-in 0.2s var(--spring-easing) forwards;
 }
 
@@ -2079,6 +2090,8 @@ body {
   flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.28s var(--spring-easing);
+  will-change: transform;
+  backface-visibility: hidden;
   padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + var(--bottom-safe)) 20px;
 }
 

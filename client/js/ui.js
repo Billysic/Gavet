@@ -282,19 +282,13 @@ export function renderUrgencyRadar(urgentItems = [], onEdit) {
     `;
   }).join('');
 
-  container.querySelectorAll('.pass-ticket-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const id = card.dataset.id;
-      const target = urgentItems.find(i => i.id === id);
-      if (target && onEdit) onEdit(target);
-    });
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        card.click();
-      }
-    });
-  });
+  container.onclick = (e) => {
+    const card = e.target.closest('.pass-ticket-card');
+    if (!card) return;
+    const id = card.dataset.id;
+    const target = urgentItems.find(i => i.id === id);
+    if (target && onEdit) onEdit(target);
+  };
 }
 
 /**
@@ -396,22 +390,24 @@ export function renderDocumentsList(documents = [], filter = 'todos', onDelete, 
     `;
   }).join('');
 
-  container.querySelectorAll('.action-btn-edit').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  container.onclick = (e) => {
+    const editBtn = e.target.closest('.action-btn-edit');
+    if (editBtn) {
       e.stopPropagation();
-      const id = btn.dataset.id;
+      const id = editBtn.dataset.id;
       const target = documents.find(d => d.id === id);
       if (target && onEdit) onEdit(target);
-    });
-  });
+      return;
+    }
 
-  container.querySelectorAll('.action-btn-delete').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    const delBtn = e.target.closest('.action-btn-delete');
+    if (delBtn) {
       e.stopPropagation();
-      const id = btn.dataset.id;
+      const id = delBtn.dataset.id;
       if (onDelete) onDelete(id);
-    });
-  });
+      return;
+    }
+  };
 }
 
 /**
