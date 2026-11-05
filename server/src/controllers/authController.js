@@ -5,6 +5,12 @@ import {
   verifyUserPassword,
   findUserById
 } from '../config/database.js';
+import {
+  isSupabaseConfigured,
+  supabaseRegister,
+  supabaseLogin,
+  supabaseGetMe
+} from '../config/supabase.js';
 
 /**
  * Cria uma nova conta de usuário
@@ -27,6 +33,24 @@ export async function register(req, res) {
       return res.status(400).json({ error: 'A senha de acesso deve ter pelo menos 6 caracteres.' });
     }
 
+    // Se Supabase estiver configurado, utiliza o Supabase Auth
+    if (isSupabaseConfigured()) {
+      const result = await supabaseRegister({
+        name: name.trim(),
+        email: email.trim(),
+        password
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: 'Conta criada com sucesso no Supabase!',
+        user: result.user,
+        token: result.token,
+        provider: 'supabase'
+      });
+    }
+
+    // Modo SQLite Local
     const existing = await findUserByEmail(email);
     if (existing) {
       return res.status(409).json({ error: 'Este e-mail já está cadastrado. Faça login ou use outro.' });
@@ -44,7 +68,8 @@ export async function register(req, res) {
       success: true,
       message: 'Conta criada com sucesso no Gavet!',
       user,
-      token
+      token,
+      provider: 'sqlite'
     });
   } catch (error) {
     console.error('Erro no registro do usuário:', error);
@@ -64,6 +89,23 @@ export async function login(req, res) {
       return res.status(400).json({ error: 'Informe o e-mail e a senha cadastrados.' });
     }
 
+    // Se Supabase estiver configurado, autentica via Supabase Auth
+    if (isSupabaseConfigured()) {
+      const result = await supabaseLogin({
+        email: email.trim(),
+        password
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Acesso autorizado via Supabase!',
+        user: result.user,
+        token: result.token,
+        provider: 'supabase'
+      });
+    }
+
+    // Modo SQLite Local
     const user = await verifyUserPassword(email, password);
     if (!user) {
       return res.status(401).json({ error: 'E-mail ou senha incorretos. Verifique suas credenciais.' });
@@ -75,11 +117,12 @@ export async function login(req, res) {
       success: true,
       message: 'Acesso autorizado!',
       user,
-      token
+      token,
+      provider: 'sqlite'
     });
   } catch (error) {
     console.error('Erro no login:', error);
-    return res.status(500).json({ error: 'Erro interno ao autenticar usuário.' });
+    return res.status(500).json({ error: error.message || 'Erro interno ao autenticar usuário.' });
   }
 }
 
@@ -95,12 +138,19 @@ export async function getMe(req, res) {
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, '');
-    const match = token.match(/^gavet_(user_\d+_[a-f0-9]+)_/);
 
+    if (isSupabaseConfigured()) {
+      const user = await supabaseGetMe(token);
+      if (user) {
+        return res.status(200).json({ success: true, user, provider: 'supabase' });
+      }
+    }
+
+    const match = token.match(/^gavet_(user_\d+_[a-f0-9]+)_/);
     if (match && match[1]) {
       const user = await findUserById(match[1]);
       if (user) {
-        return res.status(200).json({ success: true, user });
+        return res.status(200).json({ success: true, user, provider: 'sqlite' });
       }
     }
 

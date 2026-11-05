@@ -5,6 +5,13 @@ import {
   deleteDocumentById,
   syncBatchDocuments
 } from '../config/database.js';
+import {
+  isSupabaseConfigured,
+  supabaseGetAllDocuments,
+  supabaseUpsertDocument,
+  supabaseDeleteDocument,
+  supabaseSyncBatch
+} from '../config/supabase.js';
 
 /**
  * Processa upload de imagem ou PDF e extrai dados usando a API do Gemini
@@ -63,13 +70,16 @@ export async function syncDocuments(req, res) {
       });
     }
 
-    const updatedList = await syncBatchDocuments(documents);
+    const updatedList = isSupabaseConfigured()
+      ? await supabaseSyncBatch(documents)
+      : await syncBatchDocuments(documents);
 
     return res.status(200).json({
       success: true,
       message: `${documents.length} documento(s) sincronizado(s) com sucesso.`,
       count: updatedList.length,
-      data: updatedList
+      data: updatedList,
+      source: isSupabaseConfigured() ? 'supabase' : 'sqlite'
     });
   } catch (error) {
     console.error('[Sync Error] Falha na sincronização:', error.message);
@@ -86,10 +96,14 @@ export async function syncDocuments(req, res) {
  */
 export async function listDocuments(req, res) {
   try {
-    const documents = await getAllDocuments();
+    const documents = isSupabaseConfigured()
+      ? await supabaseGetAllDocuments()
+      : await getAllDocuments();
+
     return res.status(200).json({
       success: true,
-      data: documents
+      data: documents,
+      source: isSupabaseConfigured() ? 'supabase' : 'sqlite'
     });
   } catch (error) {
     return res.status(500).json({
@@ -106,10 +120,15 @@ export async function listDocuments(req, res) {
 export async function removeDocument(req, res) {
   try {
     const { id } = req.params;
-    await deleteDocumentById(id);
+    if (isSupabaseConfigured()) {
+      await supabaseDeleteDocument(id);
+    } else {
+      await deleteDocumentById(id);
+    }
     return res.status(200).json({
       success: true,
-      message: `Documento ${id} removido do servidor.`
+      message: `Documento ${id} removido do servidor.`,
+      source: isSupabaseConfigured() ? 'supabase' : 'sqlite'
     });
   } catch (error) {
     return res.status(500).json({

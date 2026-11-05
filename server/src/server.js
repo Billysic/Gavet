@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import documentRoutes from './routes/documentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import { getDatabase } from './config/database.js';
+import { isSupabaseConfigured } from './config/supabase.js';
 
 dotenv.config();
 
@@ -54,4 +55,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor da Gavet rodando na porta ${PORT}`);
   console.log(`📡 Healthcheck: http://localhost:${PORT}/api/health`);
   console.log(`✨ OCR Gemini Endpoint: http://localhost:${PORT}/api/documents/analyze`);
+  if (isSupabaseConfigured()) {
+    console.log(`⚡ Banco de Dados: Supabase PostgreSQL (Conectado)`);
+  } else {
+    console.log(`📦 Banco de Dados: SQLite Local (Fallback ativo. Para conectar ao Supabase, defina SUPABASE_URL e SUPABASE_KEY no .env)`);
+  }
 });
