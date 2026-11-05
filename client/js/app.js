@@ -400,12 +400,28 @@ function toggleDrawer() {
   }
 }
 
+function getProfileInitials() {
+  const name = appState.profile?.name || '';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  if (parts.length === 1 && parts[0].length >= 2) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  if (parts.length === 1) {
+    return parts[0][0].toUpperCase();
+  }
+  return 'G';
+}
+
 function renderAvatarElement(el, avatarVal) {
   if (!el) return;
+  const initials = getProfileInitials();
   if (avatarVal && (avatarVal.startsWith('http') || avatarVal.startsWith('data:'))) {
-    el.innerHTML = `<img src="${avatarVal}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50% !important; display: block;">`;
+    el.innerHTML = `<img src="${avatarVal}" alt="" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.onerror=null; this.parentElement.textContent='${initials}';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50% !important; display: block;">`;
   } else {
-    el.textContent = avatarVal || 'BC';
+    el.textContent = avatarVal || initials;
   }
 }
 

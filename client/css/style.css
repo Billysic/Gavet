@@ -323,13 +323,14 @@ body {
 .app-container {
   width: 100%;
   max-width: 520px;
+  margin: 0 auto;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 1;
-  padding-bottom: calc(96px + var(--bottom-safe));
+  padding-bottom: calc(115px + var(--bottom-safe));
   background-color: var(--app-bg);
   border-left: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
@@ -375,7 +376,7 @@ body {
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .header-inner {
@@ -383,12 +384,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .brand-monogram {
@@ -402,24 +405,40 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--accent-mint);
+  flex-shrink: 0;
 }
 
 .brand-info {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 .brand-line {
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1.15;
 }
 
 .brand-name {
-  font-size: 1.12rem;
+  font-size: 1.10rem;
   font-weight: 800;
   color: var(--text-pure);
   letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.brand-sub {
+  font-size: 0.70rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .brand#brand-home-trigger {
@@ -621,7 +640,7 @@ body {
 
 .vault-hero-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
@@ -629,6 +648,7 @@ body {
 .vault-label-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .vault-eyebrow {
@@ -641,12 +661,13 @@ body {
 
 .vault-main-number {
   font-family: var(--font-mono);
-  font-size: 2.1rem;
+  font-size: clamp(1.45rem, 5.2vw, 2.1rem);
   font-weight: 700;
   letter-spacing: -0.04em;
   color: var(--text-pure);
   margin-top: 4px;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .vault-badge-secure {
@@ -655,7 +676,7 @@ body {
   justify-content: center;
   gap: 6px;
   height: 28px;
-  padding: 0 11px;
+  padding: 0 10px;
   border-radius: var(--radius-pill);
   background: var(--accent-mint-dim);
   border: 1px solid rgba(0, 245, 155, 0.25);
@@ -665,8 +686,7 @@ body {
   letter-spacing: 0.02em;
   white-space: nowrap;
   line-height: 1;
-  align-self: flex-start;
-  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .vault-badge-secure svg {
@@ -913,11 +933,12 @@ body {
 .filter-pill-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  padding: 4px;
+  padding: 3px;
   border-radius: var(--radius-pill);
+  width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -926,20 +947,21 @@ body {
 }
 
 .filter-tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-secondary);
   height: 34px;
-  padding: 0 12px;
+  padding: 0 8px;
   border-radius: var(--radius-pill);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.18s var(--spring-easing);
@@ -3455,4 +3477,302 @@ body {
   background: #ffffff;
   border-color: rgba(239, 68, 68, 0.3);
   box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   19. ADAPTAÇÃO RESPONSIVA DE ALTA PRECISÃO MOBILE (< 480px & < 375px)
+   Garante centralização perfeita, sem quebras indesejadas, sem overflow
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0 14px;
+    height: 60px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-monogram {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-name {
+    font-size: 1.05rem;
+  }
+
+  .brand-sub {
+    font-size: 0.66rem;
+    max-width: 155px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-avatar-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .header-hamburger-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-main {
+    padding: 14px;
+    gap: 20px;
+  }
+
+  /* Vault Hero Card */
+  .vault-hero-card {
+    padding: 16px 14px;
+  }
+
+  .vault-hero-header {
+    gap: 10px;
+  }
+
+  .vault-eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .vault-main-number {
+    font-size: clamp(1.4rem, 5vw, 1.85rem);
+  }
+
+  .vault-badge-secure {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+
+  .vault-sub-metrics {
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  .sub-metric-item {
+    gap: 8px;
+  }
+
+  .sub-metric-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sub-metric-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .sub-metric-label {
+    font-size: 0.62rem;
+  }
+
+  .sub-metric-val {
+    font-size: 0.95rem;
+  }
+
+  .sub-metric-caption {
+    font-size: 0.62rem;
+  }
+
+  /* Radar de Atenção */
+  .radar-pass-carousel {
+    gap: 10px;
+  }
+
+  .pass-ticket-card {
+    flex: 0 0 clamp(230px, 75vw, 260px);
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .ticket-store-name {
+    font-size: 0.88rem;
+  }
+
+  .ticket-countdown-pill {
+    font-size: 0.64rem;
+    height: 22px;
+    padding: 0 7px;
+  }
+
+  .ticket-value {
+    font-size: 0.90rem;
+  }
+
+  .ticket-date-mono {
+    font-size: 0.66rem;
+  }
+
+  /* Barra de Filtros Segmentada */
+  .filter-pill-nav {
+    gap: 3px;
+    padding: 3px;
+    width: 100%;
+  }
+
+  .filter-tab {
+    padding: 0 5px;
+    height: 32px;
+    font-size: 0.70rem;
+    gap: 4px;
+  }
+
+  .filter-tab .tab-badge {
+    font-size: 0.60rem;
+  }
+
+  .tab-indicator {
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Minha Gavet Cards */
+  .inventory-row-card {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .inventory-item-lead {
+    gap: 10px;
+  }
+
+  .item-icon-badge {
+    width: 34px;
+    height: 34px;
+  }
+
+  .item-icon-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .inventory-store {
+    font-size: 0.90rem;
+  }
+
+  .inventory-subline {
+    font-size: 0.68rem;
+  }
+
+  .inventory-val-box {
+    font-size: 0.92rem;
+  }
+
+  .urgency-badge-subtle {
+    font-size: 0.68rem;
+  }
+
+  .action-btn-pill {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Thumb Dock */
+  .thumb-dock-wrapper {
+    bottom: calc(14px + var(--bottom-safe));
+  }
+
+  .thumb-dock {
+    padding: 5px 6px;
+    gap: 4px;
+  }
+
+  .dock-action-btn {
+    padding: 7px 13px;
+    font-size: 0.80rem;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 375px) {
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .brand-name {
+    font-size: 0.98rem;
+  }
+
+  .brand-sub {
+    font-size: 0.62rem;
+    max-width: 120px;
+  }
+
+  .app-main {
+    padding: 12px;
+    gap: 18px;
+  }
+
+  .vault-hero-card {
+    padding: 14px 12px;
+  }
+
+  .vault-main-number {
+    font-size: 1.35rem;
+  }
+
+  .vault-badge-secure {
+    font-size: 0.64rem;
+    padding: 0 6px;
+    height: 24px;
+  }
+
+  .vault-sub-metrics {
+    gap: 6px;
+  }
+
+  .sub-metric-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sub-metric-val {
+    font-size: 0.86rem;
+  }
+
+  .sub-metric-label {
+    font-size: 0.58rem;
+  }
+
+  .sub-metric-caption {
+    font-size: 0.58rem;
+  }
+
+  .filter-pill-nav {
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .filter-tab {
+    padding: 0 3px;
+    font-size: 0.65rem;
+    height: 30px;
+    gap: 3px;
+  }
+
+  .filter-tab .tab-badge {
+    font-size: 0.56rem;
+  }
+
+  .headline-title {
+    font-size: 0.88rem;
+  }
+
+  .headline-aux {
+    font-size: 0.68rem;
+  }
+
+  .dock-action-btn {
+    padding: 6px 11px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
 }
