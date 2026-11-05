@@ -1,11 +1,11 @@
 {
   "name": "Gavet",
   "short_name": "Gavet",
-  "description": "Organização concluída sem esforço. Gerenciador offline-first de notas fiscais, garantias e assinaturas.",
+  "description": "Vault de Garantias e Assinaturas. Organização concluída sem esforço.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
+  "background_color": "#08090C",
+  "theme_color": "#08090C",
   "orientation": "portrait-primary",
   "icons": [
     {
