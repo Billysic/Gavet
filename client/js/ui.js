@@ -535,28 +535,75 @@ export function populateModalForm(data = {}) {
 }
 
 /**
- * Atualiza visualmente os chips rápidos de prazo de vigência.
+ * Atualiza visualmente os chips rápidos de prazo de vigência ou o seletor personalizado.
  * @param {number|string} months
+ * @param {boolean} [forceCustomOpen=false]
  */
-export function updateTermChips(months) {
-  const m = parseInt(months, 10);
+export function updateTermChips(months, forceCustomOpen = false) {
+  const m = parseInt(months, 10) || 12;
   const chips = document.querySelectorAll('.term-quick-chip');
+  const customPanel = document.getElementById('custom-term-panel');
+  const customQty = document.getElementById('input-custom-term-qty');
+  const customUnit = document.getElementById('select-custom-term-unit');
+  const customExactDate = document.getElementById('input-custom-exact-date');
+  const dataCompra = document.getElementById('doc-data-compra')?.value;
+
+  const presetValues = [1, 3, 6, 12, 24, 36, 60];
+  const isPreset = presetValues.includes(m) && !forceCustomOpen;
+
   chips.forEach(chip => {
-    const chipVal = parseInt(chip.dataset.months, 10);
-    chip.classList.toggle('active', chipVal === m);
+    if (chip.dataset.months === 'custom') {
+      chip.classList.toggle('active', !isPreset);
+    } else {
+      const chipVal = parseInt(chip.dataset.months, 10);
+      chip.classList.toggle('active', isPreset && chipVal === m);
+    }
   });
 
-  const select = document.getElementById('doc-meses-garantia');
-  if (select) select.value = String(m);
+  const hiddenInput = document.getElementById('doc-meses-garantia');
+  if (hiddenInput) hiddenInput.value = String(m);
+
+  if (customPanel) {
+    customPanel.classList.toggle('hidden', isPreset);
+  }
+
+  // Sincroniza campos do painel personalizado
+  if (customQty) {
+    if (m >= 12 && m % 12 === 0 && customUnit && customUnit.value === 'years') {
+      customQty.value = String(m / 12);
+    } else {
+      customQty.value = String(m);
+      if (customUnit) customUnit.value = 'months';
+    }
+  }
+
+  // Sincroniza data exata projetada
+  if (customExactDate && dataCompra) {
+    const d = new Date(dataCompra + 'T00:00:00');
+    d.setMonth(d.getMonth() + m);
+    customExactDate.value = d.toISOString().split('T')[0];
+  }
 
   const hint = document.getElementById('hint-meses');
   if (hint) {
     if (m === 1) hint.textContent = '1 mês (Mensal)';
+    else if (m === 3) hint.textContent = '3 meses (Trimestral)';
     else if (m === 6) hint.textContent = '6 meses (Semestral)';
     else if (m === 12) hint.textContent = '12 meses (1 ano)';
     else if (m === 24) hint.textContent = '24 meses (2 anos)';
+    else if (m === 36) hint.textContent = '36 meses (3 anos)';
     else if (m === 60) hint.textContent = '60 meses (5 anos)';
-    else hint.textContent = `${m} meses`;
+    else {
+      const anos = Math.floor(m / 12);
+      const remMeses = m % 12;
+      if (anos > 0 && remMeses > 0) {
+        hint.textContent = `${m} meses (${anos}a ${remMeses}m)`;
+      } else if (anos > 0) {
+        hint.textContent = `${m} meses (${anos} ${anos === 1 ? 'ano' : 'anos'})`;
+      } else {
+        hint.textContent = `${m} meses`;
+      }
+    }
   }
 }
 
@@ -584,4 +631,10 @@ export function updateExpirationPreview() {
 
   const prefix = radioSelected === 'assinatura' ? 'Próxima renovação:' : 'Válido até:';
   previewText.textContent = `${prefix} ${formatDate(dummy.dataVencimento)} (${dummy.labelUrgencia})`;
+
+  // Mantém sincronizada a data de vencimento no seletor personalizado se data de compra mudar
+  const customExactDate = document.getElementById('input-custom-exact-date');
+  if (customExactDate && dummy.dataVencimento && !document.activeElement?.isSameNode(customExactDate)) {
+    customExactDate.value = dummy.dataVencimento;
+  }
 }

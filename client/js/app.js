@@ -1092,15 +1092,75 @@ function setupEventListeners() {
     });
   });
 
-  // Chips Rápidos de Vigência (1m, 6m, 12m, 24m, 60m)
+  // Chips de Vigência (Presets e Modo Personalizado)
   const termChips = document.querySelectorAll('.term-quick-chip');
   termChips.forEach(chip => {
     chip.addEventListener('click', () => {
       const months = chip.dataset.months;
-      updateTermChips(months);
+      if (months === 'custom') {
+        const customPanel = document.getElementById('custom-term-panel');
+        const isHidden = customPanel?.classList.contains('hidden');
+        const currentMonths = parseInt(document.getElementById('doc-meses-garantia')?.value, 10) || 12;
+        updateTermChips(currentMonths, true);
+        const inputCustomQty = document.getElementById('input-custom-term-qty');
+        if (inputCustomQty && isHidden) {
+          inputCustomQty.focus();
+          inputCustomQty.select();
+        }
+      } else {
+        updateTermChips(months);
+      }
       updateExpirationPreview();
     });
   });
+
+  // Controles Adaptativos Personalizados (Quantidade, Unidade e Data Exata)
+  const inputCustomQty = document.getElementById('input-custom-term-qty');
+  const selectCustomUnit = document.getElementById('select-custom-term-unit');
+  const inputCustomExactDate = document.getElementById('input-custom-exact-date');
+
+  function handleCustomTermChange() {
+    let qty = parseInt(inputCustomQty?.value, 10);
+    if (isNaN(qty) || qty <= 0) qty = 1;
+    const unit = selectCustomUnit?.value || 'months';
+    const totalMonths = unit === 'years' ? qty * 12 : qty;
+
+    const hiddenInput = document.getElementById('doc-meses-garantia');
+    if (hiddenInput) hiddenInput.value = String(totalMonths);
+
+    updateTermChips(totalMonths, true);
+    updateExpirationPreview();
+  }
+
+  if (inputCustomQty) {
+    inputCustomQty.addEventListener('input', handleCustomTermChange);
+  }
+  if (selectCustomUnit) {
+    selectCustomUnit.addEventListener('change', handleCustomTermChange);
+  }
+
+  if (inputCustomExactDate) {
+    inputCustomExactDate.addEventListener('change', () => {
+      const exactVal = inputCustomExactDate.value;
+      const dataCompraVal = document.getElementById('doc-data-compra')?.value;
+      if (exactVal && dataCompraVal) {
+        const dCompra = new Date(dataCompraVal + 'T00:00:00');
+        const dVenc = new Date(exactVal + 'T00:00:00');
+        
+        let diffMonths = (dVenc.getFullYear() - dCompra.getFullYear()) * 12 + (dVenc.getMonth() - dCompra.getMonth());
+        if (dVenc.getDate() > dCompra.getDate()) {
+          diffMonths += Math.round((dVenc.getDate() - dCompra.getDate()) / 30);
+        }
+        if (diffMonths <= 0) diffMonths = 1;
+
+        if (inputCustomQty) inputCustomQty.value = String(diffMonths);
+        if (selectCustomUnit) selectCustomUnit.value = 'months';
+
+        updateTermChips(diffMonths, true);
+        updateExpirationPreview();
+      }
+    });
+  }
 
   // Upload Câmera & Arquivo
   const inputCamera = document.getElementById('input-camera');

@@ -783,7 +783,7 @@
             </div>
           </div>
 
-          <!-- Prazo / Vigência: Chips de Acesso Rápido + Select -->
+          <!-- Prazo / Vigência: Chips de Acesso Rápido + Modo Personalizado -->
           <div class="form-field">
             <div class="field-header-row">
               <label for="doc-meses-garantia" id="label-meses" class="field-label">Prazo de Vigência</label>
@@ -792,21 +792,48 @@
             
             <div class="term-chips-strip">
               <button type="button" class="term-quick-chip" data-months="1">1 mês</button>
+              <button type="button" class="term-quick-chip" data-months="3">3 meses</button>
               <button type="button" class="term-quick-chip" data-months="6">6 meses</button>
               <button type="button" class="term-quick-chip active" data-months="12">12 meses</button>
               <button type="button" class="term-quick-chip" data-months="24">2 anos</button>
+              <button type="button" class="term-quick-chip" data-months="36">3 anos</button>
               <button type="button" class="term-quick-chip" data-months="60">5 anos</button>
+              <button type="button" class="term-quick-chip btn-custom-term" id="btn-custom-term" data-months="custom" title="Definir prazo personalizado ou data exata">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span>Personalizado</span>
+              </button>
             </div>
 
-            <select id="doc-meses-garantia" name="meses_garantia" class="visually-hidden">
-              <option value="1">1 mês</option>
-              <option value="3">3 meses</option>
-              <option value="6">6 meses</option>
-              <option value="12" selected>12 meses</option>
-              <option value="24">24 meses</option>
-              <option value="36">36 meses</option>
-              <option value="60">60 meses</option>
-            </select>
+            <!-- Painel Adaptativo de Duração Personalizada e Data Exata -->
+            <div id="custom-term-panel" class="custom-term-panel hidden">
+              <div class="custom-term-row">
+                <div class="custom-term-input-box">
+                  <label for="input-custom-term-qty" class="custom-term-sublabel">Quantidade</label>
+                  <input type="number" id="input-custom-term-qty" class="custom-input" min="1" max="600" value="12" placeholder="Ex: 18">
+                </div>
+                <div class="custom-term-unit-box">
+                  <label for="select-custom-term-unit" class="custom-term-sublabel">Unidade</label>
+                  <select id="select-custom-term-unit" class="custom-input">
+                    <option value="months" selected>Meses</option>
+                    <option value="years">Anos</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="custom-term-divider">
+                <span>ou informe a data final exata</span>
+              </div>
+
+              <div class="custom-term-exact-date">
+                <label for="input-custom-exact-date" class="custom-term-sublabel">Data exata de vencimento</label>
+                <input type="date" id="input-custom-exact-date" class="custom-input date-input">
+              </div>
+            </div>
+
+            <input type="hidden" id="doc-meses-garantia" name="meses_garantia" value="12">
           </div>
 
           <!-- Card de Previsão de Vencimento -->
