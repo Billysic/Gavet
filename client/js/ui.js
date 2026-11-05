@@ -450,6 +450,24 @@ export function updateMetrics(documents = []) {
 }
 
 /**
+ * Atualiza o painel de estatísticas da aba de perfil.
+ * @param {Array} documents
+ * @param {number} urgentCount
+ */
+export function updateProfileStats(documents = [], urgentCount = 0) {
+  const statDocs = document.getElementById('profile-stat-docs');
+  const statVal = document.getElementById('profile-stat-value');
+  const statAlerts = document.getElementById('profile-stat-alerts');
+
+  if (statDocs) statDocs.textContent = documents.length;
+  if (statVal) {
+    const total = documents.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+    statVal.textContent = formatCurrency(total);
+  }
+  if (statAlerts) statAlerts.textContent = urgentCount;
+}
+
+/**
  * Configura o Bottom Sheet: modo 'create' ou 'edit'.
  * @param {'create'|'edit'} mode
  * @param {Object} [data]

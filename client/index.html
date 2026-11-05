@@ -36,7 +36,7 @@
          ========================================== -->
     <header class="app-header" role="banner">
       <div class="header-inner">
-        <div class="brand">
+        <div class="brand" id="brand-home-trigger" role="button" tabindex="0" title="Ir para o Vault">
           <div class="brand-monogram" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="4"></rect>
@@ -51,6 +51,19 @@
             <span class="brand-sub">Vault de Patrimônio & Prazos</span>
           </div>
         </div>
+
+        <!-- Controles da Direita: Avatar Rápido e Botão Hambúrguer -->
+        <div class="header-actions">
+          <button type="button" id="btn-header-profile" class="header-avatar-btn" aria-label="Ir para Meu Perfil" title="Meu Perfil">
+            <span id="header-avatar-initials" class="avatar-initials">BC</span>
+          </button>
+
+          <button type="button" id="btn-hamburger" class="header-hamburger-btn" aria-label="Abrir Menu Principal" aria-expanded="false" aria-controls="nav-drawer">
+            <span class="hamburger-bar bar-1"></span>
+            <span class="hamburger-bar bar-2"></span>
+            <span class="hamburger-bar bar-3"></span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -58,6 +71,11 @@
          CONTEÚDO PRINCIPAL
          ========================================== -->
     <main class="app-main" id="main-content">
+
+      <!-- ==========================================
+           ABA 1: VAULT (DASHBOARD & INVENTÁRIO)
+           ========================================== -->
+      <div id="view-vault" class="app-view active" role="tabpanel" aria-label="Vault de Documentos">
 
       <!-- HERO: VAULT METRICS COCKPIT (Substitui cards genéricos) -->
       <section class="section-cockpit" aria-label="Painel Geral do Patrimônio">
@@ -181,8 +199,438 @@
           </button>
         </div>
       </section>
+      </div><!-- /#view-vault -->
+
+      <!-- ==========================================
+           ABA 2: CONFIGURAÇÕES (TEMAS, ALERTAS & DADOS)
+           ========================================== -->
+      <div id="view-settings" class="app-view hidden" role="tabpanel" aria-label="Configurações">
+        
+        <!-- Header da View com Retorno -->
+        <div class="view-header-strip">
+          <button type="button" class="btn-view-back" id="btn-back-settings" aria-label="Voltar para a Gavet">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Voltar ao Vault</span>
+          </button>
+          <div class="view-header-text">
+            <h1 class="view-headline">Configurações</h1>
+            <p class="view-subheadline">Personalização visual, preferências de alerta e dados locais</p>
+          </div>
+        </div>
+
+        <!-- Grupo 1: Temas Visuais (Dark, Light, Cyberpunk) -->
+        <section class="settings-card" aria-labelledby="heading-themes">
+          <div class="settings-card-header">
+            <div class="settings-icon-pill icon-theme">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="heading-themes" class="settings-title">Tema Visual</h2>
+              <span class="settings-desc">Escolha a aparência que melhor combina com seu estilo</span>
+            </div>
+          </div>
+
+          <!-- 3 Cards de Temas: Escuro, Claro e Cyberpunk -->
+          <div class="theme-picker-grid" role="radiogroup" aria-label="Seleção de Tema">
+            
+            <!-- Tema 1: Escuro (Obsidian) -->
+            <label class="theme-card-option" data-theme-value="dark">
+              <input type="radio" name="app_theme" value="dark" class="visually-hidden">
+              <div class="theme-preview-box preview-dark">
+                <div class="preview-header"></div>
+                <div class="preview-lines">
+                  <span class="p-line-1"></span>
+                  <span class="p-line-2"></span>
+                </div>
+                <span class="theme-check-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="theme-meta">
+                <strong>Obsidian Escuro</strong>
+                <small>Preto Titânio & Menta</small>
+              </div>
+            </label>
+
+            <!-- Tema 2: Claro (Clean Paper) -->
+            <label class="theme-card-option" data-theme-value="light">
+              <input type="radio" name="app_theme" value="light" class="visually-hidden">
+              <div class="theme-preview-box preview-light">
+                <div class="preview-header"></div>
+                <div class="preview-lines">
+                  <span class="p-line-1"></span>
+                  <span class="p-line-2"></span>
+                </div>
+                <span class="theme-check-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="theme-meta">
+                <strong>Clean Claro</strong>
+                <small>Branco Níveo & Esmeralda</small>
+              </div>
+            </label>
+
+            <!-- Tema 3: Cyberpunk (Neon Synthwave) -->
+            <label class="theme-card-option" data-theme-value="cyberpunk">
+              <input type="radio" name="app_theme" value="cyberpunk" class="visually-hidden">
+              <div class="theme-preview-box preview-cyberpunk">
+                <div class="preview-header"></div>
+                <div class="preview-lines">
+                  <span class="p-line-1"></span>
+                  <span class="p-line-2"></span>
+                </div>
+                <span class="theme-check-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="theme-meta">
+                <strong>Cyber Neon</strong>
+                <small>Violeta Profundo & Ciano</small>
+              </div>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- Grupo 2: Radar & Prazos -->
+        <section class="settings-card" aria-labelledby="heading-alerts">
+          <div class="settings-card-header">
+            <div class="settings-icon-pill icon-alerts">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="heading-alerts" class="settings-title">Radar de Prazos</h2>
+              <span class="settings-desc">Configuração da janela de alerta antecipado</span>
+            </div>
+          </div>
+
+          <div class="settings-item-row">
+            <div class="item-info">
+              <label for="setting-radar-days" class="item-title">Janela de Atenção Crítica</label>
+              <span class="item-subtitle">Itens com vencimento dentro deste prazo aparecem no Radar</span>
+            </div>
+            <select id="setting-radar-days" class="settings-select">
+              <option value="7">7 dias antes</option>
+              <option value="15">15 dias antes</option>
+              <option value="30" selected>30 dias antes (Recomendado)</option>
+              <option value="60">60 dias antes</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Grupo 3: Gestão de Dados & Backup -->
+        <section class="settings-card" aria-labelledby="heading-data">
+          <div class="settings-card-header">
+            <div class="settings-icon-pill icon-storage">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="heading-data" class="settings-title">Dados & Backup Offline</h2>
+              <span class="settings-desc">Seus dados residem 100% no seu navegador com IndexedDB</span>
+            </div>
+          </div>
+
+          <div class="settings-actions-stack">
+            <button type="button" class="btn-settings-action" id="btn-export-vault">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <div class="action-text">
+                <strong>Exportar Backup do Vault</strong>
+                <small>Baixar arquivo JSON com todas as notas e garantias</small>
+              </div>
+            </button>
+
+            <label class="btn-settings-action" for="input-import-vault">
+              <input type="file" id="input-import-vault" accept=".json" class="visually-hidden">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div class="action-text">
+                <strong>Restaurar / Importar Backup</strong>
+                <small>Carregar arquivo JSON para mesclar ou restaurar registros</small>
+              </div>
+            </label>
+
+            <button type="button" class="btn-settings-danger" id="btn-clear-db">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>Limpar Todos os Registros do Vault</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Grupo 4: Sobre o Gavet -->
+        <section class="settings-card card-about">
+          <div class="about-brand">
+            <div class="brand-monogram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="2" y="4" width="20" height="16" rx="4"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
+            </div>
+            <div class="about-text">
+              <strong>Gavet v2.1.0</strong>
+              <p>Bespoke Vault • PWA Offline • Gemini 2.5 Flash</p>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /#view-settings -->
+
+      <!-- ==========================================
+           ABA 3: PERFIL (DADOS PESSOAIS & ESTATÍSTICAS)
+           ========================================== -->
+      <div id="view-profile" class="app-view hidden" role="tabpanel" aria-label="Meu Perfil">
+        
+        <!-- Header da View com Retorno -->
+        <div class="view-header-strip">
+          <button type="button" class="btn-view-back" id="btn-back-profile" aria-label="Voltar para a Gavet">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Voltar ao Vault</span>
+          </button>
+          <div class="view-header-text">
+            <h1 class="view-headline">Meu Perfil</h1>
+            <p class="view-subheadline">Gerencie sua identidade, preferências de conta e resumo do cofre</p>
+          </div>
+        </div>
+
+        <!-- Card Destaque de Perfil com Avatar -->
+        <section class="profile-hero-card">
+          <div class="profile-avatar-wrap">
+            <div id="profile-avatar-display" class="profile-avatar-big">BC</div>
+            <button type="button" id="btn-toggle-avatar-picker" class="avatar-edit-badge" title="Mudar Avatar" aria-label="Alterar Avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Seletor Rápido de Emojis/Avatares (colapsável) -->
+          <div id="avatar-picker-dock" class="avatar-picker-chips hidden">
+            <button type="button" class="avatar-chip" data-avatar="🛡️">🛡️</button>
+            <button type="button" class="avatar-chip" data-avatar="💎">💎</button>
+            <button type="button" class="avatar-chip" data-avatar="💼">💼</button>
+            <button type="button" class="avatar-chip" data-avatar="⚡">⚡</button>
+            <button type="button" class="avatar-chip" data-avatar="🚀">🚀</button>
+            <button type="button" class="avatar-chip" data-avatar="👑">👑</button>
+            <button type="button" class="avatar-chip" data-avatar="🦊">🦊</button>
+            <button type="button" class="avatar-chip" data-avatar="initials">Iniciais</button>
+          </div>
+
+          <div class="profile-identity">
+            <h2 id="profile-name-display" class="profile-name-headline">Usuário Gavet</h2>
+            <span id="profile-email-display" class="profile-email-text">usuario@gavet.app</span>
+            <div class="profile-badge-tier">
+              <span class="tier-dot"></span>
+              <span>Vault Pessoal • Acesso Offline Total</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cockpit de Estatísticas Pessoais -->
+        <section class="profile-stats-grid" aria-label="Estatísticas da Conta">
+          <div class="profile-stat-box">
+            <span class="stat-number" id="profile-stat-docs">0</span>
+            <span class="stat-label">Documentos</span>
+          </div>
+          <div class="profile-stat-box">
+            <span class="stat-number" id="profile-stat-value">R$ 0,00</span>
+            <span class="stat-label">Sob Gestão</span>
+          </div>
+          <div class="profile-stat-box">
+            <span class="stat-number" id="profile-stat-alerts">0</span>
+            <span class="stat-label">Alertas Ativos</span>
+          </div>
+        </section>
+
+        <!-- Formulário de Informações Pessoais -->
+        <section class="settings-card" aria-labelledby="heading-profile-edit">
+          <div class="settings-card-header">
+            <div class="settings-icon-pill icon-profile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="heading-profile-edit" class="settings-title">Informações Pessoais</h2>
+              <span class="settings-desc">Personalize como seu nome e dados aparecem no sistema</span>
+            </div>
+          </div>
+
+          <form id="profile-form" class="profile-form-body">
+            <div class="form-field">
+              <label for="input-profile-name" class="field-label">Nome Completo</label>
+              <div class="field-input-box">
+                <input type="text" id="input-profile-name" class="custom-input" placeholder="Seu Nome ou Apelido" required>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="input-profile-email" class="field-label">E-mail Principal</label>
+              <div class="field-input-box">
+                <input type="email" id="input-profile-email" class="custom-input" placeholder="seuemail@exemplo.com">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="input-profile-gemini-key" class="field-label">
+                Chave API Gemini Pessoal <small style="color:var(--text-muted); font-weight:400;">(Opcional)</small>
+              </label>
+              <div class="field-input-box">
+                <input type="password" id="input-profile-gemini-key" class="custom-input" placeholder="AIzaSy... (para usar sua própria cota)">
+              </div>
+              <small class="field-annotation">Por padrão, o app utiliza a IA conectada no servidor.</small>
+            </div>
+
+            <button type="submit" id="btn-save-profile" class="btn-vault-action" style="margin-top: 12px;">
+              <span class="btn-text">Salvar Alterações do Perfil</span>
+            </button>
+          </form>
+        </section>
+
+      </div><!-- /#view-profile -->
 
     </main>
+
+    <!-- ==========================================
+         DRAWER DE NAVEGAÇÃO LATERAL (MENU HAMBÚRGUER)
+         ========================================== -->
+    <div id="drawer-backdrop" class="drawer-overlay hidden" aria-hidden="true"></div>
+
+    <aside id="nav-drawer" class="navigation-drawer" aria-label="Menu Principal" aria-hidden="true">
+      <!-- Topo do Drawer -->
+      <div class="drawer-header">
+        <div class="drawer-brand">
+          <div class="brand-monogram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="2" y="4" width="20" height="16" rx="4"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+              <line x1="10" y1="15" x2="14" y2="15"/>
+            </svg>
+          </div>
+          <div>
+            <span class="drawer-title">Gavet</span>
+            <span class="drawer-tag">v2.1.0</span>
+          </div>
+        </div>
+        <button type="button" id="btn-close-drawer" class="drawer-close-btn" aria-label="Fechar menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Card de Usuário no Drawer -->
+      <div class="drawer-user-card" id="drawer-user-trigger" role="button" tabindex="0" title="Ver perfil">
+        <div id="drawer-user-avatar" class="drawer-avatar">BC</div>
+        <div class="drawer-user-info">
+          <strong id="drawer-user-name" class="drawer-user-name">Usuário Gavet</strong>
+          <span id="drawer-user-email" class="drawer-user-email">usuario@gavet.app</span>
+        </div>
+        <svg class="drawer-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+
+      <!-- Links de Navegação -->
+      <nav class="drawer-nav-menu">
+        <button type="button" class="drawer-nav-item active" data-navigate="vault">
+          <div class="nav-item-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="4"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <div class="nav-item-text">
+            <strong>Vault (Início)</strong>
+            <small>Métricas, radar e documentos</small>
+          </div>
+          <span class="nav-item-indicator"></span>
+        </button>
+
+        <button type="button" class="drawer-nav-item" data-navigate="settings">
+          <div class="nav-item-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <div class="nav-item-text">
+            <strong>Configurações</strong>
+            <small>Temas claro/escuro/cyber, dados</small>
+          </div>
+          <span class="nav-item-indicator"></span>
+        </button>
+
+        <button type="button" class="drawer-nav-item" data-navigate="profile">
+          <div class="nav-item-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="nav-item-text">
+            <strong>Meu Perfil</strong>
+            <small>Estatísticas e dados da conta</small>
+          </div>
+          <span class="nav-item-indicator"></span>
+        </button>
+      </nav>
+
+      <!-- Seletor Rápido de Temas no Rodapé do Drawer -->
+      <div class="drawer-footer">
+        <span class="drawer-footer-title">Tema Rápido</span>
+        <div class="drawer-theme-strip" role="radiogroup" aria-label="Trocar tema">
+          <button type="button" class="quick-theme-btn" data-theme-set="dark" title="Tema Escuro">
+            <span>🌑 Escuro</span>
+          </button>
+          <button type="button" class="quick-theme-btn" data-theme-set="light" title="Tema Claro">
+            <span>☀️ Claro</span>
+          </button>
+          <button type="button" class="quick-theme-btn" data-theme-set="cyberpunk" title="Tema Cyberpunk">
+            <span>🔮 Cyber</span>
+          </button>
+        </div>
+      </div>
+    </aside>
 
     <!-- ==========================================
          THUMB DOCK / FLOATING ACTION BAR

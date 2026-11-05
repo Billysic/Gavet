@@ -199,3 +199,44 @@ export async function seedIfEmpty(demoItems = []) {
     transaction.onerror = (e) => reject(e.target.error);
   });
 }
+
+/**
+ * Limpa todos os documentos da base local.
+ * @returns {Promise<void>}
+ */
+export async function clearAllDocuments() {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.clear();
+
+    request.onsuccess = () => resolve();
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+/**
+ * Importa uma lista de documentos para o IndexedDB.
+ * @param {Array} docs
+ * @returns {Promise<number>} Quantidade de documentos inseridos/atualizados
+ */
+export async function importDocuments(docs = []) {
+  if (!Array.isArray(docs) || docs.length === 0) return 0;
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+
+    let count = 0;
+    for (const doc of docs) {
+      if (doc && doc.loja) {
+        store.put(doc);
+        count++;
+      }
+    }
+
+    transaction.oncomplete = () => resolve(count);
+    transaction.onerror = (e) => reject(e.target.error);
+  });
+}
