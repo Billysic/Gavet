@@ -32,6 +32,11 @@ import {
 } from './api.js';
 
 import {
+  loginWithGoogle,
+  checkOAuthCallback
+} from './supabase.js';
+
+import {
   renderUrgencyRadar,
   renderDocumentsList,
   updateMetrics,
@@ -180,6 +185,32 @@ async function initApp() {
   } catch (err) {
     console.error('Falha ao inicializar IndexedDB:', err);
     showToast('Erro ao acessar base local IndexedDB', 'danger');
+  }
+
+  // Verifica se o usuário retornou de um redirecionamento OAuth com o Google
+  try {
+    const oauthSession = await checkOAuthCallback();
+    if (oauthSession) {
+      appState.auth = {
+        token: oauthSession.token,
+        user: oauthSession.user
+      };
+      appState.profile = {
+        name: oauthSession.user.name,
+        email: oauthSession.user.email,
+        avatar: oauthSession.user.avatar
+      };
+
+      localStorage.setItem('gavet_token', oauthSession.token);
+      localStorage.setItem('gavet_user', JSON.stringify(oauthSession.user));
+      localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
+
+      populateProfileForm();
+      updateAuthUI();
+      showToast(`Bem-vindo, ${oauthSession.user.name}!`, 'success');
+    }
+  } catch (err) {
+    console.warn('[OAuth] Verificação falhou:', err);
   }
 
   // Preenche dados do perfil na UI
@@ -363,6 +394,15 @@ function toggleDrawer() {
   }
 }
 
+function renderAvatarElement(el, avatarVal) {
+  if (!el) return;
+  if (avatarVal && (avatarVal.startsWith('http') || avatarVal.startsWith('data:'))) {
+    el.innerHTML = `<img src="${avatarVal}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block;">`;
+  } else {
+    el.textContent = avatarVal || 'BC';
+  }
+}
+
 /**
  * Sincroniza dados do perfil nos múltiplos elementos da interface
  */
@@ -371,13 +411,13 @@ function populateProfileForm() {
 
   // Header avatar
   const headerAvatar = document.getElementById('header-avatar-initials');
-  if (headerAvatar) headerAvatar.textContent = p.avatar || 'BC';
+  renderAvatarElement(headerAvatar, p.avatar);
 
   // Drawer
   const drawerAvatar = document.getElementById('drawer-user-avatar');
   const drawerName = document.getElementById('drawer-user-name');
   const drawerEmail = document.getElementById('drawer-user-email');
-  if (drawerAvatar) drawerAvatar.textContent = p.avatar || 'BC';
+  renderAvatarElement(drawerAvatar, p.avatar);
   if (drawerName) drawerName.textContent = p.name || 'Usuário Gavet';
   if (drawerEmail) drawerEmail.textContent = p.email || 'usuario@gavet.app';
 
@@ -385,7 +425,7 @@ function populateProfileForm() {
   const profileAvatar = document.getElementById('profile-avatar-display');
   const profileName = document.getElementById('profile-name-display');
   const profileEmail = document.getElementById('profile-email-display');
-  if (profileAvatar) profileAvatar.textContent = p.avatar || 'BC';
+  renderAvatarElement(profileAvatar, p.avatar);
   if (profileName) profileName.textContent = p.name || 'Usuário Gavet';
   if (profileEmail) profileEmail.textContent = p.email || 'usuario@gavet.app';
 
@@ -1096,6 +1136,25 @@ function setupEventListeners() {
 
   if (registerPwdConfirm) {
     registerPwdConfirm.addEventListener('input', checkPasswordMatch);
+  }
+
+  // Login com o Google
+  const btnGoogleAuth = document.getElementById('btn-google-auth');
+  if (btnGoogleAuth) {
+    btnGoogleAuth.addEventListener('click', async () => {
+      try {
+        clearAuthFeedback();
+        btnGoogleAuth.disabled = true;
+        const googleText = document.getElementById('google-auth-text');
+        if (googleText) googleText.textContent = 'Conectando ao Google...';
+        await loginWithGoogle();
+      } catch (err) {
+        btnGoogleAuth.disabled = false;
+        const googleText = document.getElementById('google-auth-text');
+        if (googleText) googleText.textContent = 'Continuar com o Google';
+        showAuthFeedback(err.message || 'Falha ao iniciar autenticação com Google.');
+      }
+    });
   }
 
   window.addEventListener('keydown', (e) => {
