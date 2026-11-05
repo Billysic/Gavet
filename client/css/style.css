@@ -480,31 +480,48 @@ body {
   font-weight: 700;
   color: var(--text-pure);
   letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
 .headline-aux {
   font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 500;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
 }
 
 .radar-counter {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
-  padding: 1px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
   border-radius: var(--radius-pill);
   background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-medium);
   color: var(--text-secondary);
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .pulse-indicator-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background-color: var(--urgency-critical);
   box-shadow: 0 0 8px var(--urgency-critical);
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 /* --------------------------------------------------------------------------
@@ -1780,7 +1797,10 @@ body {
    12. NAVEGAÇÃO ENTRE ABAS & CONTROLE DE VIEWS
    -------------------------------------------------------------------------- */
 .app-view {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
 }
 
 .app-view.hidden {
@@ -1788,7 +1808,7 @@ body {
 }
 
 .app-view.active {
-  display: block;
+  display: flex;
   animation: viewFadeIn 0.24s var(--spring-easing) forwards;
 }
 
@@ -1804,7 +1824,7 @@ body {
 }
 
 .view-header-strip {
-  padding: 8px 16px 20px 16px;
+  padding: 4px 0 10px 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2128,7 +2148,8 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card), var(--hardware-light);
   padding: 20px;
-  margin: 0 16px 18px 16px;
+  margin: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2451,7 +2472,8 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card), var(--hardware-light);
   padding: 24px 20px;
-  margin: 0 16px 16px 16px;
+  margin: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2575,7 +2597,8 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin: 0 16px 18px 16px;
+  margin: 0;
+  width: 100%;
 }
 
 .profile-stat-box {
