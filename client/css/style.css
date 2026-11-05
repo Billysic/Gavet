@@ -218,6 +218,50 @@ html {
   font-family: var(--font-display);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* Scrollbar refinada (Desktop) para estabilizar a tela e eliminar saltos horizontais */
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg-void);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-mint);
+}
+
+/* Compatibilidade Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) var(--bg-void);
+}
+
+[data-theme="light"] html::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+[data-theme="light"] html::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border: 2px solid #f8fafc;
+}
+
+[data-theme="light"] html::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="light"] html {
+  scrollbar-color: rgba(0, 0, 0, 0.18) #f8fafc;
 }
 
 body {
