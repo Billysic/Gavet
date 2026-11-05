@@ -28,7 +28,8 @@ import {
   syncWithServer,
   apiRegister,
   apiLogin,
-  apiGetMe
+  apiGetMe,
+  fetchServerDocuments
 } from './api.js';
 
 import {
@@ -209,6 +210,22 @@ async function initApp() {
       populateProfileForm();
       updateAuthUI();
       showToast(`Bem-vindo, ${oauthSession.user.name}!`, 'success');
+      await syncPullFromServer();
+    } else if (appState.auth && appState.auth.token) {
+      // Valida se a sessão existente continua ativa no backend
+      if (navigator.onLine) {
+        const validatedUser = await apiGetMe(appState.auth.token);
+        if (validatedUser) {
+          appState.auth.user = validatedUser;
+          localStorage.setItem('gavet_user', JSON.stringify(validatedUser));
+          await syncPullFromServer();
+        } else {
+          console.warn('[Auth] Sessão anterior expirada.');
+          localStorage.removeItem('gavet_token');
+          localStorage.removeItem('gavet_user');
+          appState.auth = null;
+        }
+      }
     }
   } catch (err) {
     console.warn('[OAuth] Verificação falhou:', err);
@@ -672,6 +689,8 @@ async function handleLoginSubmit(e) {
     updateAuthUI();
     closeAuthModal();
     showToast(`Bem-vindo de volta, ${data.user.name}!`, 'success');
+    await syncPullFromServer();
+    await triggerBackgroundSync();
   } catch (err) {
     showAuthFeedback(err.message || 'Falha ao autenticar.');
   } finally {
@@ -744,6 +763,8 @@ async function handleRegisterSubmit(e) {
     updateAuthUI();
     closeAuthModal();
     showToast(`Conta criada com sucesso! Olá, ${data.user.name}!`, 'success');
+    await triggerBackgroundSync();
+    await syncPullFromServer();
   } catch (err) {
     showAuthFeedback(err.message || 'Erro ao cadastrar conta.');
   } finally {
@@ -757,7 +778,7 @@ async function handleRegisterSubmit(e) {
 /**
  * Realiza logout da conta
  */
-function handleLogout() {
+async function handleLogout() {
   localStorage.removeItem('gavet_token');
   localStorage.removeItem('gavet_user');
   
@@ -768,6 +789,15 @@ function handleLogout() {
     avatar: 'BC'
   };
   localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
+
+  // Restaura dados iniciais e limpa vault do usuário logado
+  try {
+    await clearAllDocuments();
+    appState.documents = await seedIfEmpty(DEMO_ITEMS);
+    refreshUI();
+  } catch (err) {
+    console.warn('[Logout] Erro ao redefinir base local:', err);
+  }
 
   populateProfileForm();
   updateAuthUI();
@@ -1495,21 +1525,67 @@ function handleNetworkChange() {
   }
 }
 
+/**
+ * Baixa os documentos do servidor para sincronização bidirecional (PULL)
+ * e hidrata a base IndexedDB local.
+ */
+async function syncPullFromServer() {
+  const token = localStorage.getItem('gavet_token');
+  if (!token || !navigator.onLine) return;
+
+  try {
+    const serverDocs = await fetchServerDocuments();
+    if (Array.isArray(serverDocs) && serverDocs.length > 0) {
+      // Se houver documentos reais no servidor, limpa os registros fictícios de demonstração
+      const localDocs = await getAllDocuments();
+      for (const item of localDocs) {
+        if (item.id && String(item.id).startsWith('demo_')) {
+          await deleteDocument(item.id);
+        }
+      }
+
+      // Converte e grava no IndexedDB com status de sincronizado ativo
+      const normalized = serverDocs.map((doc) => ({
+        id: doc.id,
+        loja: doc.loja || 'Documento',
+        valor: typeof doc.valor === 'number' ? doc.valor : parseFloat(doc.valor) || 0,
+        data_compra: doc.data_compra,
+        meses_garantia: parseInt(doc.meses_garantia, 10) || 12,
+        tipo_documento: doc.tipo_documento || 'garantia',
+        synced: 1,
+        createdAt: doc.created_at || doc.createdAt || new Date().toISOString(),
+        updatedAt: doc.updated_at || doc.updatedAt || new Date().toISOString()
+      }));
+
+      await importDocuments(normalized);
+      appState.documents = await getAllDocuments();
+      refreshUI();
+    }
+  } catch (err) {
+    console.warn('[Sync Pull] Falha ao sincronizar documentos do servidor:', err);
+  }
+}
+
+/**
+ * Envia pendências locais ao servidor (PUSH) e sincroniza novos dados remotos (PULL)
+ */
 async function triggerBackgroundSync() {
   if (!navigator.onLine) return;
 
   try {
     const unsynced = await getUnsyncedDocuments();
-    if (unsynced.length === 0) return;
-
-    const res = await syncWithServer(unsynced);
-    if (res.success) {
-      for (const item of unsynced) {
-        await markDocumentSynced(item.id);
+    if (unsynced.length > 0) {
+      const res = await syncWithServer(unsynced);
+      if (res.success) {
+        for (const item of unsynced) {
+          await markDocumentSynced(item.id);
+        }
+        appState.documents = await getAllDocuments();
+        refreshUI();
       }
-      appState.documents = await getAllDocuments();
-      refreshUI();
     }
+    // Realiza sincronização reversa (PULL)
+    await syncPullFromServer();
   } catch (err) {
     console.warn('[Sync] Falha na sincronização:', err);
   }

@@ -39,19 +39,38 @@ export async function register(req, res) {
 
     // Se Supabase estiver configurado, utiliza o Supabase Auth
     if (isSupabaseConfigured()) {
-      const result = await supabaseRegister({
-        name: name.trim(),
-        email: email.trim(),
-        password
-      });
+      try {
+        const result = await supabaseRegister({
+          name: name.trim(),
+          email: email.trim(),
+          password
+        });
 
-      return res.status(201).json({
-        success: true,
-        message: 'Conta criada com sucesso no Supabase!',
-        user: result.user,
-        token: result.token,
-        provider: 'supabase'
-      });
+        return res.status(201).json({
+          success: true,
+          message: 'Conta criada com sucesso no Supabase!',
+          user: result.user,
+          token: result.token,
+          provider: 'supabase'
+        });
+      } catch (err) {
+        const msg = err.message || '';
+        const lower = msg.toLowerCase();
+        if (
+          lower.includes('already registered') ||
+          lower.includes('already exists') ||
+          lower.includes('user already registered')
+        ) {
+          return res.status(409).json({ error: 'Este e-mail já está cadastrado. Faça login ou use outro.' });
+        }
+        if (lower.includes('rate limit') || lower.includes('too many requests')) {
+          return res.status(429).json({ error: 'Limite de requisições excedido. Tente novamente mais tarde.' });
+        }
+        if (lower.includes('weak password') || lower.includes('password should be')) {
+          return res.status(400).json({ error: 'A senha informada não atende aos requisitos mínimos de segurança.' });
+        }
+        return res.status(400).json({ error: msg || 'Falha ao criar conta no Supabase.' });
+      }
     }
 
     // Modo SQLite Local
@@ -95,18 +114,38 @@ export async function login(req, res) {
 
     // Se Supabase estiver configurado, autentica via Supabase Auth
     if (isSupabaseConfigured()) {
-      const result = await supabaseLogin({
-        email: email.trim(),
-        password
-      });
+      try {
+        const result = await supabaseLogin({
+          email: email.trim(),
+          password
+        });
 
-      return res.status(200).json({
-        success: true,
-        message: 'Acesso autorizado via Supabase!',
-        user: result.user,
-        token: result.token,
-        provider: 'supabase'
-      });
+        return res.status(200).json({
+          success: true,
+          message: 'Acesso autorizado via Supabase!',
+          user: result.user,
+          token: result.token,
+          provider: 'supabase'
+        });
+      } catch (err) {
+        const msg = err.message || '';
+        const lower = msg.toLowerCase();
+        if (
+          lower.includes('invalid login credentials') ||
+          lower.includes('credentials') ||
+          lower.includes('incorret') ||
+          lower.includes('invalid credentials')
+        ) {
+          return res.status(401).json({ error: 'E-mail ou senha incorretos. Verifique suas credenciais.' });
+        }
+        if (lower.includes('rate limit') || lower.includes('too many requests')) {
+          return res.status(429).json({ error: 'Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente.' });
+        }
+        if (lower.includes('email not confirmed')) {
+          return res.status(403).json({ error: 'Endereço de e-mail ainda não confirmado. Verifique sua caixa de entrada.' });
+        }
+        return res.status(400).json({ error: msg || 'Falha ao autenticar no Supabase.' });
+      }
     }
 
     // Modo SQLite Local

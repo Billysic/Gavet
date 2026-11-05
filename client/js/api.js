@@ -176,3 +176,35 @@ export async function apiGetMe(token) {
     return null;
   }
 }
+
+/**
+ * Busca todos os documentos persistidos no servidor pertencentes ao usuário autenticado.
+ * Permite a hidratação completa da base local ao logar em novos navegadores ou dispositivos.
+ * @returns {Promise<Array>} Lista de documentos do usuário
+ */
+export async function fetchServerDocuments() {
+  const token = localStorage.getItem('gavet_token');
+  if (!token) return [];
+
+  try {
+    const response = await fetch('/api/documents', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        console.warn('[API] Sessão expirada ou não autorizada ao buscar documentos.');
+      }
+      return [];
+    }
+
+    const data = await response.json();
+    return Array.isArray(data.data) ? data.data : [];
+  } catch (err) {
+    console.warn('[API] Erro ao carregar documentos do servidor:', err.message);
+    return [];
+  }
+}
