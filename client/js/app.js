@@ -232,6 +232,11 @@ async function initApp() {
   setupEventListeners();
   refreshUI();
   triggerBackgroundSync();
+
+  // Exibe a tela de login de primeira se o usuário não possuir sessão ativa
+  if (!appState.auth || !appState.auth.token) {
+    openAuthModal('login');
+  }
 }
 
 /**
@@ -477,17 +482,30 @@ function handleSelectAvatar(avatarVal) {
  */
 function openAuthModal(defaultTab = 'login') {
   const modal = document.getElementById('auth-screen');
+  const btnClose = document.getElementById('btn-close-auth');
   if (!modal) return;
 
   switchAuthTab(defaultTab);
   clearAuthFeedback();
   modal.classList.remove('hidden');
+
+  if (btnClose) {
+    if (appState.auth && appState.auth.token) {
+      btnClose.classList.remove('hidden');
+    } else {
+      btnClose.classList.add('hidden');
+    }
+  }
 }
 
 /**
- * Fecha a tela de autenticação
+ * Fecha a tela de autenticação (bloqueado se não autenticado)
  */
 function closeAuthModal() {
+  if (!appState.auth || !appState.auth.token) {
+    showToast('Por favor, faça login ou crie sua conta para acessar o Gavet.', 'warning');
+    return;
+  }
   const modal = document.getElementById('auth-screen');
   if (modal) modal.classList.add('hidden');
 }
@@ -498,8 +516,8 @@ function closeAuthModal() {
 function switchAuthTab(tab) {
   const tabLogin = document.getElementById('tab-auth-login');
   const tabRegister = document.getElementById('tab-auth-register');
-  const formLogin = document.getElementById('form-login');
-  const formRegister = document.getElementById('form-register');
+  const contentLogin = document.getElementById('tab-content-login');
+  const contentRegister = document.getElementById('tab-content-register');
 
   clearAuthFeedback();
 
@@ -509,16 +527,16 @@ function switchAuthTab(tab) {
     tabLogin?.classList.remove('active');
     tabLogin?.setAttribute('aria-selected', 'false');
 
-    formRegister?.classList.remove('hidden');
-    formLogin?.classList.add('hidden');
+    contentRegister?.classList.remove('hidden');
+    contentLogin?.classList.add('hidden');
   } else {
     tabLogin?.classList.add('active');
     tabLogin?.setAttribute('aria-selected', 'true');
     tabRegister?.classList.remove('active');
     tabRegister?.setAttribute('aria-selected', 'false');
 
-    formLogin?.classList.remove('hidden');
-    formRegister?.classList.add('hidden');
+    contentLogin?.classList.remove('hidden');
+    contentRegister?.classList.add('hidden');
   }
 }
 
@@ -728,9 +746,9 @@ function handleLogout() {
   
   appState.auth = { token: null, user: null };
   appState.profile = {
-    name: 'Convidado Gavet',
-    email: 'offline@gavet.app',
-    avatar: 'CV'
+    name: 'Usuário Gavet',
+    email: 'usuario@gavet.app',
+    avatar: 'BC'
   };
   localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
 
@@ -1065,25 +1083,22 @@ function setupEventListeners() {
   const tabAuthLogin = document.getElementById('tab-auth-login');
   const tabAuthRegister = document.getElementById('tab-auth-register');
   const linkGoToLogin = document.getElementById('link-go-to-login');
-  const btnGuestMode = document.getElementById('btn-guest-mode');
+  const linkGoToRegister = document.getElementById('link-go-to-register');
 
   if (btnCloseAuth) btnCloseAuth.addEventListener('click', closeAuthModal);
   if (authScreen) {
     authScreen.addEventListener('click', (e) => {
-      if (e.target === authScreen) closeAuthModal();
+      // Bloqueia fechamento ao clicar no backdrop se o usuário não estiver autenticado
+      if (e.target === authScreen && appState.auth && appState.auth.token) {
+        closeAuthModal();
+      }
     });
   }
 
   if (tabAuthLogin) tabAuthLogin.addEventListener('click', () => switchAuthTab('login'));
   if (tabAuthRegister) tabAuthRegister.addEventListener('click', () => switchAuthTab('register'));
   if (linkGoToLogin) linkGoToLogin.addEventListener('click', () => switchAuthTab('login'));
-
-  if (btnGuestMode) {
-    btnGuestMode.addEventListener('click', () => {
-      closeAuthModal();
-      showToast('Modo visitante ativo (apenas armazenamento local)', 'info');
-    });
-  }
+  if (linkGoToRegister) linkGoToRegister.addEventListener('click', () => switchAuthTab('register'));
 
   // Formulários de Autenticação
   const formLogin = document.getElementById('form-login');
@@ -1138,30 +1153,35 @@ function setupEventListeners() {
     registerPwdConfirm.addEventListener('input', checkPasswordMatch);
   }
 
-  // Login com o Google
-  const btnGoogleAuth = document.getElementById('btn-google-auth');
-  if (btnGoogleAuth) {
-    btnGoogleAuth.addEventListener('click', async () => {
-      try {
-        clearAuthFeedback();
-        btnGoogleAuth.disabled = true;
-        const googleText = document.getElementById('google-auth-text');
-        if (googleText) googleText.textContent = 'Conectando ao Google...';
-        await loginWithGoogle();
-      } catch (err) {
-        btnGoogleAuth.disabled = false;
-        const googleText = document.getElementById('google-auth-text');
-        if (googleText) googleText.textContent = 'Continuar com o Google';
-        showAuthFeedback(err.message || 'Falha ao iniciar autenticação com Google.');
-      }
-    });
-  }
+  // Login com o Google (nas abas Entrar e Cadastrar)
+  const handleGoogleAuthClick = async (btn) => {
+    try {
+      clearAuthFeedback();
+      btn.disabled = true;
+      const span = btn.querySelector('span');
+      const originalText = span ? span.textContent : '';
+      if (span) span.textContent = 'Conectando ao Google...';
+      await loginWithGoogle();
+    } catch (err) {
+      btn.disabled = false;
+      const span = btn.querySelector('span');
+      if (span) span.textContent = btn.id === 'btn-google-register' ? 'Cadastrar com o Google' : 'Entrar com o Google';
+      showAuthFeedback(err.message || 'Falha ao iniciar autenticação com Google.');
+    }
+  };
+
+  const btnGoogleLogin = document.getElementById('btn-google-login');
+  const btnGoogleRegister = document.getElementById('btn-google-register');
+  if (btnGoogleLogin) btnGoogleLogin.addEventListener('click', () => handleGoogleAuthClick(btnGoogleLogin));
+  if (btnGoogleRegister) btnGoogleRegister.addEventListener('click', () => handleGoogleAuthClick(btnGoogleRegister));
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
       closeDrawer();
-      closeAuthModal();
+      if (appState.auth && appState.auth.token) {
+        closeAuthModal();
+      }
     }
   });
 }

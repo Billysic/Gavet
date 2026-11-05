@@ -2849,6 +2849,31 @@ body {
   transition: all 0.2s ease;
 }
 
+.auth-close-btn.hidden {
+  display: none !important;
+}
+
+.auth-tab-content.hidden {
+  display: none !important;
+}
+
+.auth-tab-content {
+  display: flex;
+  flex-direction: column;
+  animation: authContentFade 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes authContentFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .auth-close-btn:hover {
   color: var(--text-pure);
   border-color: var(--border-medium);
