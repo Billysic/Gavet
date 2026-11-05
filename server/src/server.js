@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import documentRoutes from './routes/documentRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { getDatabase } from './config/database.js';
 
 dotenv.config();
@@ -26,6 +27,7 @@ await getDatabase();
 
 // Rotas da API
 app.use('/api/documents', documentRoutes);
+app.use('/api/auth', authRoutes);
 
 // Healthcheck (ótimo para monitoramento no Render)
 app.get('/api/health', (req, res) => {

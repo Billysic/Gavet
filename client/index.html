@@ -515,6 +515,42 @@
           </form>
         </section>
 
+        <!-- Gerenciamento de Sessão e Conta -->
+        <section class="settings-card card-account-session" aria-labelledby="heading-account-session">
+          <div class="settings-card-header">
+            <div class="settings-icon-pill icon-auth">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="heading-account-session" class="settings-title">Sessão da Conta</h2>
+              <span id="account-session-desc" class="settings-desc">Status da autenticação local e nuvem</span>
+            </div>
+          </div>
+          
+          <div class="account-actions-box">
+            <button type="button" id="btn-open-auth-profile" class="btn-vault-action btn-subtle-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span id="btn-open-auth-profile-label">Trocar de Conta / Fazer Login</span>
+            </button>
+
+            <button type="button" id="btn-logout-profile" class="btn-vault-action btn-danger-action">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              <span>Sair da Conta (Logout)</span>
+            </button>
+          </div>
+        </section>
+
       </div><!-- /#view-profile -->
 
     </main>
@@ -585,6 +621,21 @@
           <div class="nav-item-text">
             <strong>Configurações</strong>
             <small>Temas claro/escuro/cyber, dados</small>
+          </div>
+          <span class="nav-item-indicator"></span>
+        </button>
+
+        <button type="button" class="drawer-nav-item" id="drawer-auth-action">
+          <div class="nav-item-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+          </div>
+          <div class="nav-item-text">
+            <strong id="drawer-auth-action-title">Entrar / Cadastrar</strong>
+            <small id="drawer-auth-action-sub">Sincronize seus dados</small>
           </div>
           <span class="nav-item-indicator"></span>
         </button>
@@ -835,6 +886,179 @@
               </svg>
             </button>
           </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TELA DE LOGIN E CRIAÇÃO DE CONTA (AUTH MODAL)
+         ========================================== -->
+    <div id="auth-screen" class="auth-overlay-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="auth-card-panel">
+        
+        <!-- Botão de Fechar -->
+        <button type="button" id="btn-close-auth" class="auth-close-btn" aria-label="Fechar tela de autenticação" title="Fechar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <!-- Cabeçalho da Marca -->
+        <div class="auth-brand-header">
+          <div class="brand-monogram auth-monogram" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="4"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+              <line x1="10" y1="15" x2="14" y2="15"/>
+            </svg>
+          </div>
+          <h2 id="auth-modal-title" class="auth-title">Gavet</h2>
+          <p class="auth-subtitle">Vault de Patrimônio, Garantias & Assinaturas</p>
+        </div>
+
+        <!-- Seletor Segmentado: Entrar / Criar Conta -->
+        <div class="auth-tabs-nav" role="tablist">
+          <button type="button" class="auth-tab-btn active" id="tab-auth-login" role="tab" aria-selected="true" data-tab="login">
+            <span>Entrar</span>
+          </button>
+          <button type="button" class="auth-tab-btn" id="tab-auth-register" role="tab" aria-selected="false" data-tab="register">
+            <span>Criar Conta</span>
+          </button>
+        </div>
+
+        <!-- Mensagem de Alerta/Feedback Global do Modal -->
+        <div id="auth-feedback" class="auth-feedback-banner hidden" role="alert"></div>
+
+        <!-- ================= ABA 1: LOGIN ================= -->
+        <form id="form-login" class="auth-form-body" novalidate>
+          <div class="form-field">
+            <label for="login-email" class="field-label">E-mail</label>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input type="email" id="login-email" class="custom-input with-icon" placeholder="seu@email.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="field-header-row">
+              <label for="login-password" class="field-label">Senha de Acesso</label>
+            </div>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="login-password" class="custom-input with-icon" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="btn-toggle-pwd" data-target="login-password" aria-label="Mostrar ou ocultar senha" title="Mostrar senha">
+                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit-login" class="btn-vault-action auth-submit-btn">
+            <span class="btn-text">Acessar Gavet</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+
+          <div class="auth-divider">
+            <span>ou</span>
+          </div>
+
+          <button type="button" id="btn-guest-mode" class="btn-auth-guest">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 14 14"/>
+            </svg>
+            <span>Continuar como Convidado (Modo Offline)</span>
+          </button>
+        </form>
+
+        <!-- ================= ABA 2: CRIAR CONTA (CADASTRO) ================= -->
+        <form id="form-register" class="auth-form-body hidden" novalidate>
+          <div class="form-field">
+            <label for="register-name" class="field-label">Nome Completo</label>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input type="text" id="register-name" class="custom-input with-icon" placeholder="Como deseja ser chamado" required autocomplete="name">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="register-email" class="field-label">E-mail</label>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input type="email" id="register-email" class="custom-input with-icon" placeholder="seu@email.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="register-password" class="field-label">Criar Senha</label>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="register-password" class="custom-input with-icon" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+              <button type="button" class="btn-toggle-pwd" data-target="register-password" aria-label="Mostrar ou ocultar senha" title="Mostrar senha">
+                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Medidor visual de força da senha -->
+            <div class="pwd-strength-container" aria-live="polite">
+              <div class="strength-bars">
+                <span class="strength-bar" id="str-bar-1"></span>
+                <span class="strength-bar" id="str-bar-2"></span>
+                <span class="strength-bar" id="str-bar-3"></span>
+              </div>
+              <span class="strength-label" id="strength-label">Força da senha</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="register-password-confirm" class="field-label">Confirmar Senha</label>
+            <div class="field-input-box auth-input-box">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="register-password-confirm" class="custom-input with-icon" placeholder="Repita a senha criada" required autocomplete="new-password">
+            </div>
+            <span id="pwd-match-hint" class="field-annotation" style="display:none; margin-top: 4px;"></span>
+          </div>
+
+          <button type="submit" id="btn-submit-register" class="btn-vault-action auth-submit-btn">
+            <span class="btn-text">Criar Minha Conta</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+
+          <p class="auth-switch-note">
+            Já possui uma conta?
+            <button type="button" class="btn-link-action" id="link-go-to-login">Entrar agora</button>
+          </p>
         </form>
 
       </div>

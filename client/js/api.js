@@ -108,3 +108,83 @@ export async function syncWithServer(documents = []) {
     return { success: false, count: 0, error: error.message };
   }
 }
+
+/**
+ * Cria uma nova conta no backend
+ * @param {{ name: string, email: string, password: string }} data
+ */
+export async function apiRegister({ name, email, password }) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Erro ao criar conta.');
+    }
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Tempo de conexão esgotado ao contatar o servidor.');
+    }
+    throw err;
+  }
+}
+
+/**
+ * Realiza autenticação com email e senha no backend
+ * @param {{ email: string, password: string }} credentials
+ */
+export async function apiLogin({ email, password }) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Erro ao realizar login.');
+    }
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Tempo de conexão esgotado ao contatar o servidor.');
+    }
+    throw err;
+  }
+}
+
+/**
+ * Valida o token e retorna o usuário logado
+ * @param {string} token
+ */
+export async function apiGetMe(token) {
+  if (!token) return null;
+  try {
+    const response = await fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.user || null;
+  } catch {
+    return null;
+  }
+}

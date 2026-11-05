@@ -25,7 +25,10 @@ import {
 
 import {
   sendFileToGemini,
-  syncWithServer
+  syncWithServer,
+  apiRegister,
+  apiLogin,
+  apiGetMe
 } from './api.js';
 
 import {
@@ -43,6 +46,20 @@ import {
   updateExpirationPreview,
   updateTermChips
 } from './ui.js';
+
+/**
+ * Lê a sessão de autenticação do usuário
+ */
+function getStoredAuth() {
+  try {
+    const token = localStorage.getItem('gavet_token') || null;
+    const userRaw = localStorage.getItem('gavet_user');
+    const user = userRaw ? JSON.parse(userRaw) : null;
+    return { token, user };
+  } catch (e) {
+    return { token: null, user: null };
+  }
+}
 
 /**
  * Lê o perfil do usuário armazenado no localStorage
@@ -69,6 +86,7 @@ let appState = {
   theme: localStorage.getItem('gavet_theme') || 'dark',
   radarDays: parseInt(localStorage.getItem('gavet_radar_days') || '30', 10),
   profile: getStoredProfile(),
+  auth: getStoredAuth(),
   isOnline: navigator.onLine
 };
 
@@ -166,6 +184,7 @@ async function initApp() {
 
   // Preenche dados do perfil na UI
   populateProfileForm();
+  updateAuthUI();
 
   // Inicializa seletor de dias do radar
   const selectRadarDays = document.getElementById('setting-radar-days');
@@ -411,6 +430,314 @@ function handleSelectAvatar(avatarVal) {
   const dock = document.getElementById('avatar-picker-dock');
   if (dock) dock.classList.add('hidden');
   showToast('Avatar alterado!', 'info');
+}
+
+/**
+ * Abre o Modal/Tela de Autenticação (Login / Cadastro)
+ */
+function openAuthModal(defaultTab = 'login') {
+  const modal = document.getElementById('auth-screen');
+  if (!modal) return;
+
+  switchAuthTab(defaultTab);
+  clearAuthFeedback();
+  modal.classList.remove('hidden');
+}
+
+/**
+ * Fecha a tela de autenticação
+ */
+function closeAuthModal() {
+  const modal = document.getElementById('auth-screen');
+  if (modal) modal.classList.add('hidden');
+}
+
+/**
+ * Alterna entre a aba de login e cadastro
+ */
+function switchAuthTab(tab) {
+  const tabLogin = document.getElementById('tab-auth-login');
+  const tabRegister = document.getElementById('tab-auth-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+
+  clearAuthFeedback();
+
+  if (tab === 'register') {
+    tabRegister?.classList.add('active');
+    tabRegister?.setAttribute('aria-selected', 'true');
+    tabLogin?.classList.remove('active');
+    tabLogin?.setAttribute('aria-selected', 'false');
+
+    formRegister?.classList.remove('hidden');
+    formLogin?.classList.add('hidden');
+  } else {
+    tabLogin?.classList.add('active');
+    tabLogin?.setAttribute('aria-selected', 'true');
+    tabRegister?.classList.remove('active');
+    tabRegister?.setAttribute('aria-selected', 'false');
+
+    formLogin?.classList.remove('hidden');
+    formRegister?.classList.add('hidden');
+  }
+}
+
+function showAuthFeedback(msg, type = 'error') {
+  const banner = document.getElementById('auth-feedback');
+  if (!banner) return;
+  banner.textContent = msg;
+  banner.className = `auth-feedback-banner ${type}`;
+  banner.classList.remove('hidden');
+}
+
+function clearAuthFeedback() {
+  const banner = document.getElementById('auth-feedback');
+  if (banner) {
+    banner.textContent = '';
+    banner.className = 'auth-feedback-banner hidden';
+  }
+}
+
+/**
+ * Avalia força da senha para o formulário de cadastro
+ */
+function evaluatePasswordStrength(password) {
+  let score = 0;
+  if (!password) return score;
+  if (password.length >= 6) score++;
+  if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) score++;
+  if (password.length >= 10 && /[^A-Za-z0-9]/.test(password)) score++;
+  return score;
+}
+
+function updatePasswordStrengthUI(password) {
+  const score = evaluatePasswordStrength(password);
+  const bar1 = document.getElementById('str-bar-1');
+  const bar2 = document.getElementById('str-bar-2');
+  const bar3 = document.getElementById('str-bar-3');
+  const label = document.getElementById('strength-label');
+
+  const neutral = 'var(--border-medium)';
+  const red = '#EF4444';
+  const yellow = '#F59E0B';
+  const green = 'var(--accent-mint)';
+
+  if (!bar1 || !bar2 || !bar3 || !label) return;
+
+  if (score === 0) {
+    bar1.style.backgroundColor = neutral;
+    bar2.style.backgroundColor = neutral;
+    bar3.style.backgroundColor = neutral;
+    label.textContent = 'Mínimo 6 chars';
+    label.style.color = 'var(--text-muted)';
+  } else if (score === 1) {
+    bar1.style.backgroundColor = red;
+    bar2.style.backgroundColor = neutral;
+    bar3.style.backgroundColor = neutral;
+    label.textContent = 'Fraca';
+    label.style.color = red;
+  } else if (score === 2) {
+    bar1.style.backgroundColor = yellow;
+    bar2.style.backgroundColor = yellow;
+    bar3.style.backgroundColor = neutral;
+    label.textContent = 'Média';
+    label.style.color = yellow;
+  } else {
+    bar1.style.backgroundColor = green;
+    bar2.style.backgroundColor = green;
+    bar3.style.backgroundColor = green;
+    label.textContent = 'Forte';
+    label.style.color = green;
+  }
+}
+
+/**
+ * Submissão do Formulário de Login
+ */
+async function handleLoginSubmit(e) {
+  e.preventDefault();
+  clearAuthFeedback();
+
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  const submitBtn = document.getElementById('btn-submit-login');
+
+  const email = emailInput?.value.trim() || '';
+  const password = passwordInput?.value || '';
+
+  if (!email || !password) {
+    showAuthFeedback('Por favor, informe seu e-mail e senha.');
+    return;
+  }
+
+  const originalText = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="btn-text">Autenticando...</span>';
+  }
+
+  try {
+    const data = await apiLogin({ email, password });
+    
+    appState.auth = {
+      token: data.token,
+      user: data.user
+    };
+    appState.profile = {
+      name: data.user.name,
+      email: data.user.email,
+      avatar: data.user.avatar || 'BC'
+    };
+
+    localStorage.setItem('gavet_token', data.token);
+    localStorage.setItem('gavet_user', JSON.stringify(data.user));
+    localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
+
+    populateProfileForm();
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`Bem-vindo de volta, ${data.user.name}!`, 'success');
+  } catch (err) {
+    showAuthFeedback(err.message || 'Falha ao autenticar.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  }
+}
+
+/**
+ * Submissão do Formulário de Cadastro
+ */
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  clearAuthFeedback();
+
+  const nameInput = document.getElementById('register-name');
+  const emailInput = document.getElementById('register-email');
+  const passwordInput = document.getElementById('register-password');
+  const confirmInput = document.getElementById('register-password-confirm');
+  const submitBtn = document.getElementById('btn-submit-register');
+
+  const name = nameInput?.value.trim() || '';
+  const email = emailInput?.value.trim() || '';
+  const password = passwordInput?.value || '';
+  const confirm = confirmInput?.value || '';
+
+  if (!name || name.length < 2) {
+    showAuthFeedback('O nome deve conter ao menos 2 caracteres.');
+    return;
+  }
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    showAuthFeedback('Por favor, insira um e-mail válido.');
+    return;
+  }
+  if (!password || password.length < 6) {
+    showAuthFeedback('A senha deve conter ao menos 6 caracteres.');
+    return;
+  }
+  if (password !== confirm) {
+    showAuthFeedback('As senhas digitadas não coincidem.');
+    return;
+  }
+
+  const originalText = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="btn-text">Criando conta...</span>';
+  }
+
+  try {
+    const data = await apiRegister({ name, email, password });
+
+    appState.auth = {
+      token: data.token,
+      user: data.user
+    };
+    appState.profile = {
+      name: data.user.name,
+      email: data.user.email,
+      avatar: data.user.avatar || 'BC'
+    };
+
+    localStorage.setItem('gavet_token', data.token);
+    localStorage.setItem('gavet_user', JSON.stringify(data.user));
+    localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
+
+    populateProfileForm();
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`Conta criada com sucesso! Olá, ${data.user.name}!`, 'success');
+  } catch (err) {
+    showAuthFeedback(err.message || 'Erro ao cadastrar conta.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  }
+}
+
+/**
+ * Realiza logout da conta
+ */
+function handleLogout() {
+  localStorage.removeItem('gavet_token');
+  localStorage.removeItem('gavet_user');
+  
+  appState.auth = { token: null, user: null };
+  appState.profile = {
+    name: 'Convidado Gavet',
+    email: 'offline@gavet.app',
+    avatar: 'CV'
+  };
+  localStorage.setItem('gavet_profile', JSON.stringify(appState.profile));
+
+  populateProfileForm();
+  updateAuthUI();
+  showToast('Você saiu da sua conta.', 'info');
+  openAuthModal('login');
+}
+
+/**
+ * Sincroniza indicadores visuais da sessão na interface
+ */
+function updateAuthUI() {
+  const isLoggedIn = Boolean(appState.auth && appState.auth.token);
+  const user = appState.auth?.user;
+
+  // Drawer Auth Action Button
+  const drawerAuthTitle = document.getElementById('drawer-auth-action-title');
+  const drawerAuthSub = document.getElementById('drawer-auth-action-sub');
+  if (drawerAuthTitle && drawerAuthSub) {
+    if (isLoggedIn) {
+      drawerAuthTitle.textContent = 'Sair da Conta';
+      drawerAuthSub.textContent = user?.email || 'Encerrar sessão';
+    } else {
+      drawerAuthTitle.textContent = 'Entrar / Cadastrar';
+      drawerAuthSub.textContent = 'Sincronize seus dados';
+    }
+  }
+
+  // Profile View: Badge e Descrição de Sessão
+  const sessionDesc = document.getElementById('account-session-desc');
+  const btnOpenAuthLabel = document.getElementById('btn-open-auth-profile-label');
+  const btnLogoutProfile = document.getElementById('btn-logout-profile');
+
+  if (sessionDesc) {
+    sessionDesc.textContent = isLoggedIn
+      ? `Conectado como ${user?.email || appState.profile.email}`
+      : 'Modo offline local ativo. Entre para sincronizar.';
+  }
+
+  if (btnOpenAuthLabel) {
+    btnOpenAuthLabel.textContent = isLoggedIn ? 'Trocar de Conta' : 'Entrar ou Criar Conta';
+  }
+
+  if (btnLogoutProfile) {
+    btnLogoutProfile.style.display = isLoggedIn ? 'flex' : 'none';
+  }
 }
 
 /**
@@ -669,10 +996,113 @@ function setupEventListeners() {
     updateExpirationPreview();
   }));
 
+  // Autenticação: Drawer e Perfil
+  const drawerAuthAction = document.getElementById('drawer-auth-action');
+  if (drawerAuthAction) {
+    drawerAuthAction.addEventListener('click', () => {
+      closeDrawer();
+      if (appState.auth && appState.auth.token) {
+        handleLogout();
+      } else {
+        openAuthModal('login');
+      }
+    });
+  }
+
+  const btnOpenAuthProfile = document.getElementById('btn-open-auth-profile');
+  const btnLogoutProfile = document.getElementById('btn-logout-profile');
+
+  if (btnOpenAuthProfile) {
+    btnOpenAuthProfile.addEventListener('click', () => openAuthModal('login'));
+  }
+  if (btnLogoutProfile) {
+    btnLogoutProfile.addEventListener('click', handleLogout);
+  }
+
+  // Auth Screen / Modal Controls
+  const authScreen = document.getElementById('auth-screen');
+  const btnCloseAuth = document.getElementById('btn-close-auth');
+  const tabAuthLogin = document.getElementById('tab-auth-login');
+  const tabAuthRegister = document.getElementById('tab-auth-register');
+  const linkGoToLogin = document.getElementById('link-go-to-login');
+  const btnGuestMode = document.getElementById('btn-guest-mode');
+
+  if (btnCloseAuth) btnCloseAuth.addEventListener('click', closeAuthModal);
+  if (authScreen) {
+    authScreen.addEventListener('click', (e) => {
+      if (e.target === authScreen) closeAuthModal();
+    });
+  }
+
+  if (tabAuthLogin) tabAuthLogin.addEventListener('click', () => switchAuthTab('login'));
+  if (tabAuthRegister) tabAuthRegister.addEventListener('click', () => switchAuthTab('register'));
+  if (linkGoToLogin) linkGoToLogin.addEventListener('click', () => switchAuthTab('login'));
+
+  if (btnGuestMode) {
+    btnGuestMode.addEventListener('click', () => {
+      closeAuthModal();
+      showToast('Modo visitante ativo (apenas armazenamento local)', 'info');
+    });
+  }
+
+  // Formulários de Autenticação
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+  if (formLogin) formLogin.addEventListener('submit', handleLoginSubmit);
+  if (formRegister) formRegister.addEventListener('submit', handleRegisterSubmit);
+
+  // Botões de Visualizar/Ocultar Senha
+  const togglePwdBtns = document.querySelectorAll('.btn-toggle-pwd');
+  togglePwdBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const targetInput = document.getElementById(targetId);
+      if (!targetInput) return;
+      const isPassword = targetInput.type === 'password';
+      targetInput.type = isPassword ? 'text' : 'password';
+      btn.title = isPassword ? 'Ocultar senha' : 'Ver senha';
+    });
+  });
+
+  // Medidor de Força de Senha e Confirmação
+  const registerPwd = document.getElementById('register-password');
+  const registerPwdConfirm = document.getElementById('register-password-confirm');
+  const pwdMatchHint = document.getElementById('pwd-match-hint');
+
+  function checkPasswordMatch() {
+    if (!registerPwdConfirm || !registerPwd || !pwdMatchHint) return;
+    const pwd = registerPwd.value;
+    const confirm = registerPwdConfirm.value;
+    if (!confirm) {
+      pwdMatchHint.style.display = 'none';
+      return;
+    }
+    pwdMatchHint.style.display = 'block';
+    if (pwd === confirm) {
+      pwdMatchHint.textContent = '✓ As senhas coincidem';
+      pwdMatchHint.style.color = 'var(--accent-mint)';
+    } else {
+      pwdMatchHint.textContent = '✕ As senhas não coincidem';
+      pwdMatchHint.style.color = '#EF4444';
+    }
+  }
+
+  if (registerPwd) {
+    registerPwd.addEventListener('input', (e) => {
+      updatePasswordStrengthUI(e.target.value);
+      checkPasswordMatch();
+    });
+  }
+
+  if (registerPwdConfirm) {
+    registerPwdConfirm.addEventListener('input', checkPasswordMatch);
+  }
+
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
       closeDrawer();
+      closeAuthModal();
     }
   });
 }
